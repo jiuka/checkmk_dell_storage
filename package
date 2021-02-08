@@ -4,6 +4,7 @@
     'download_url': 'https://github.com/jiuka/checkmk_dell_storage/releases',
     'files': {
         'agent_based': [
+            'dell_storage_alert.py',
             'dell_storage_center.py',
             'dell_storage_controller.py',
             'dell_storage_disk.py',
@@ -22,11 +23,14 @@
         'inventory': [],
         'notifications': [],
         'pnp-templates': [],
-        'web': ['plugins/wato/datasource_dell_storage.py']
+        'web': [
+            'plugins/metrics/dell_storage.py',
+            'plugins/wato/datasource_dell_storage.py',
+        ]
     },
     'name': 'dell_storage',
     'title': u'Checkmk Dell Storage API Specia-Agent',
-    'version': '0.1',
+    'version': '0.2',
     'version.min_required': '2.0.0b5',
     'version.packaged': '2.0.0b5'
 }

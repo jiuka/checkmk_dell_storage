@@ -193,6 +193,10 @@ class DellStorageApi:
         def volumes(self):
             return self._get_associations(f'/StorageCenter/StorageCenter/{self.instanceId}/VolumeList')
 
+        @cached_property
+        def activeAlerts(self):
+            return self._get_associations(f'/StorageCenter/StorageCenter/{self.instanceId}/ActiveAlertList')
+
     class ScChassis(ApiObject):
         instanceId: str
         instanceName: str
@@ -410,7 +414,7 @@ class DellStorageApi:
     class ScEnclosureTemperatureSensor(ScControllerTemperatureSensor):
         AGENT_FIELDS = [
             'location',
-            'temperature',
+            'currentTemperature',
             'None', 'lowerCriticalThreshold', 'lowerWarningThreshold',
             'upperWarningThreshold', 'upperCriticalThreshold', 'None',
         ]
@@ -433,7 +437,7 @@ class DellStorageApi:
 
         @cached_property
         def usage(self):
-            return self._api.get(f'/StorageCenter/ScVolume/{self.instanceId}/StorageUsage')
+            return self._get_association(f'/StorageCenter/ScVolume/{self.instanceId}/StorageUsage')
 
         @cached_property
         def iousage(self):
@@ -446,6 +450,20 @@ class DellStorageApi:
     class ScVolumeStorageUsage(ScDiskStorageUsage):
         activeSpace: DellStorageApiParser.space
         configuredSpace: DellStorageApiParser.space
+
+    class ScAlert(ApiObject):
+        AGENT_DEFAULT_FIELDS = []
+        AGENT_FIELDS = [
+            'alertDefinition',
+            'message',
+            'acknowledged',
+            'supportUrl',
+        ] 
+
+        alertDefinition: str
+        message: str
+        acknowledged: str
+        supportUrl: str
 
 
 class AgentDellStorage:
@@ -487,6 +505,8 @@ class AgentDellStorage:
 
             self.section('volume', storageCenter.volumes)
 
+            self.section('alert', storageCenter.activeAlerts, force=True)
+
             print('<<<<>>>>')
 
             if storageCenter.chassisPresent:
@@ -500,7 +520,7 @@ class AgentDellStorage:
 
             for controller in storageCenter.controllers:
                 self.piggyback(f'{storageCenter.instanceName}-{controller.instanceName}')
-                self.section('controller', storageCenter.controllers)
+                self.section('controller', [controller])
 
                 self.section('port', controller.ports)
 
@@ -514,7 +534,7 @@ class AgentDellStorage:
 
             for enclosure in storageCenter.enclosures:
                 self.piggyback(f'{storageCenter.instanceName}-{enclosure.instanceName}')
-                self.section('enclosure', storageCenter.enclosures)
+                self.section('enclosure', [enclosure])
 
                 self.section('fan', enclosure.fans)
 
@@ -529,8 +549,8 @@ class AgentDellStorage:
     def piggyback(self, name=None):
         print(f'<<<<{re.sub(r"[^a-zA-Z0-9-_]", "", name)}>>>>')
 
-    def section(self, name, instances=[], separator=';'):
-        if not instances:
+    def section(self, name, instances=[], separator=';', force=False):
+        if not instances and not force:
             return
         print('<<<dell_storage_{name}:sep({sep})>>>'.format(name=name, sep=ord(separator)))
         for instance in instances:
