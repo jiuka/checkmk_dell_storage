@@ -1,21 +1,32 @@
 {
-    'author': u'',
-    'description': u'',
-    'download_url': '',
+    'author': u'Marius Rieder <marius.rieder@scs.ch>',
+    'description': u'Check Dell Storage Managed by the Dell Storage Manager with the Storage REST API.',
+    'download_url': 'https://github.com/jiuka/checkmk_dell_storage/releases',
     'files': {
-        'agent_based': [],
-        'agents': [],
+        'agent_based': [
+            'dell_storage_center.py',
+            'dell_storage_controller.py',
+            'dell_storage_disk.py',
+            'dell_storage_enclosure.py',
+            'dell_storage_fan.py',
+            'dell_storage_port.py',
+            'dell_storage_psu.py',
+            'dell_storage_temp.py',
+            'dell_storage_volume.py',
+            'utils/dell_storage.py',
+        ],
+        'agents': ['special/agent_dell_storage'],
         'checkman': [],
-        'checks': [],
+        'checks': ['agent_dell_storage'],
         'doc': [],
         'inventory': [],
         'notifications': [],
         'pnp-templates': [],
-        'web': []
+        'web': ['plugins/wato/datasource_dell_storage.py']
     },
-    'name': '',
-    'title': u'',
+    'name': 'dell_storage',
+    'title': u'Checkmk Dell Storage API Specia-Agent',
     'version': '0.1',
-    'version.min_required': '2.0.0',
-    'version.packaged': '2.0.0'
+    'version.min_required': '2.0.0b5',
+    'version.packaged': '2.0.0b5'
 }

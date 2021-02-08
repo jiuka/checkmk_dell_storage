@@ -31,53 +31,45 @@ from .utils.dell_storage import (
 )
 
 
-class ScEnclosure(NamedTuple):
+class ScPSU(NamedTuple):
     name: str
     status: str
     statusMessage: str
-    modelSeries: str
-    version: str
-    encType: str
-    capacity: str
-    serviceTag: str
-    expressServiceCode: str
+    location: str
 
 
-def parse_dell_storage_enclosure(string_table):
-    return [ScEnclosure(*enc) for enc in string_table]
+def parse_dell_storage_psu(string_table):
+    return [ScPSU(*psu) for psu in string_table]
 
 
 register.agent_section(
-    name='dell_storage_enclosure',
-    parse_function=parse_dell_storage_enclosure,
+    name='dell_storage_psu',
+    parse_function=parse_dell_storage_psu,
 )
 
 
-def discovery_dell_storage_enclosure(section):
-    for enc in section:
-        yield Service(item=enc.name)
+def discovery_dell_storage_psu(section):
+    for psu in section:
+        yield Service(item=psu.name)
 
 
-def check_dell_storage_enclosure(item, section):
-    for enc in section:
-        if not enc.name == item:
+def check_dell_storage_psu(item, section):
+    for psu in section:
+        if not psu.name == item:
             continue
 
-        yield from DSResult(enc)
+        yield from DSResult(psu)
+        if psu.location != 'None':
+            yield Result(state=State.OK, summary=psu.location)
 
-        yield Result(state=State.OK, summary=f'Model: {enc.modelSeries} v{enc.version}, Type{enc.encType}')
-        yield Result(state=State.OK, summary=f'Capacity: {enc.capacity}')
-
-        yield Result(state=State.OK, summary=f'ST: {enc.serviceTag}')
-        yield Result(state=State.OK, summary=f'ESC: {enc.expressServiceCode}')
         return
 
-    yield Result(state=State.UNKNOWN, summary='Enclosure %s not found.' % item)
+    yield Result(state=State.UNKNOWN, summary='PSU %s not found.' % item)
 
 
 register.check_plugin(
-    name='dell_storage_enclosure',
-    service_name='Enclosure %s',
-    discovery_function=discovery_dell_storage_enclosure,
-    check_function=check_dell_storage_enclosure,
+    name='dell_storage_psu',
+    service_name='PSU %s',
+    discovery_function=discovery_dell_storage_psu,
+    check_function=check_dell_storage_psu,
 )

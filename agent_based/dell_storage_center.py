@@ -27,7 +27,7 @@ from .agent_based_api.v1 import (
     State,
 )
 from .utils.dell_storage import (
-    DSStatus
+    DSResult
 )
 
 
@@ -39,6 +39,14 @@ class StorageCenter(NamedTuple):
     version: str
     serviceTag: str
     serialNumber: str
+    numberOfControllers: int
+    numberOfDevicesInUse: int
+    numberOfDisks: int
+    numberOfLiveVolumes: int
+    numberOfReplays: int
+    numberOfReplications: int
+    numberOfServers: int
+    numberOfVolumes: int
 
 
 def parse_dell_storage_center(string_table):
@@ -61,17 +69,25 @@ def check_dell_storage_center(item, section):
         if not sc.name == item:
             continue
 
-        yield Result(state=DSStatus(sc.status), summary=f'{sc.status}')
-
-        if sc.statusMessage:
-            yield Result(state=State.OK, summary=f'({sc.statusMessage})')
+        yield from DSResult(sc)
 
         yield Result(state=State.OK, summary=f'Model: {sc.modelSeries} v{sc.version}')
         yield Result(state=State.OK, summary=f'ST: {sc.serviceTag}')
         yield Result(state=State.OK, summary=f'SN: {sc.serialNumber}')
+
+        
+        yield Metric('controller', float(sc.numberOfControllers))
+        yield Metric('device', float(sc.numberOfDevicesInUse))
+        yield Metric('disk', float(sc.numberOfDisks))
+        yield Metric('live_volume', float(sc.numberOfLiveVolumes))
+        yield Metric('replay', float(sc.numberOfReplays))
+        yield Metric('replication', float(sc.numberOfReplications))
+        yield Metric('server', float(sc.numberOfServers))
+        yield Metric('volume', float(sc.numberOfVolumes))
+
         return
 
-    yield Result(state=State.UNKNOWN, summary='Sensor %s not found.' % item)
+    yield Result(state=State.UNKNOWN, summary='Storage Center %s not found.' % item)
 
 
 register.check_plugin(

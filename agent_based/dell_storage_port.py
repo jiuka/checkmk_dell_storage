@@ -21,23 +21,24 @@
 
 from typing import NamedTuple
 from .agent_based_api.v1 import (
+    Metric,
     register,
     Result,
     Service,
     State,
-    Metric,
 )
 from .utils.dell_storage import (
     DSResult
 )
 
 
-class ScDisk(NamedTuple):
+class ScPort(NamedTuple):
     name: str
     status: str
     statusMessage: str
-    allocatedSpace: str
-    totalSpace: str
+    cabled: str
+    type: str
+    wwn: str
     readIops: str
     readBps: str
     readLatency: str
@@ -45,47 +46,47 @@ class ScDisk(NamedTuple):
     writeBps: str
     writeLatency: str
 
-
-def parse_dell_storage_disk(string_table):
-    return [ScDisk(*disk) for disk in string_table]
+def parse_dell_storage_port(string_table):
+    return [ScPort(*port) for port in string_table]
 
 
 register.agent_section(
-    name='dell_storage_disk',
-    parse_function=parse_dell_storage_disk,
+    name='dell_storage_port',
+    parse_function=parse_dell_storage_port,
 )
 
 
-def discovery_dell_storage_disk(section):
-    for disk in section:
-        yield Service(item=disk.name)
+def discovery_dell_storage_port(section):
+    for port in section:
+        yield Service(item=port.name)
 
 
-def check_dell_storage_disk(item, section):
-    for disk in section:
-        if not disk.name == item:
+def check_dell_storage_port(item, section):
+    for port in section:
+        if not port.name == item:
             continue
 
-        yield from DSResult(disk)
+        yield from DSResult(port)
 
-        yield Metric('usage',
-                     int(disk.allocatedSpace),
-                     boundaries=(0, int(disk.totalSpace)))
-        yield Metric('disk_read_ios', int(disk.readIops))
-        yield Metric('disk_read_throughput', int(disk.readBps))
-        yield Metric('read_latency', float(disk.readLatency))
-        yield Metric('disk_write_ios', int(disk.writeIops))
-        yield Metric('disk_write_throughput', int(disk.writeBps))
-        yield Metric('write_latency', float(disk.writeLatency))
+        yield Result(state=State.OK, summary=f'Cabled: {port.cabled}')
+        yield Result(state=State.OK, summary=f'Type: {port.type}')
+        yield Result(state=State.OK, summary=f'WWN: {port.wwn}')
+
+        yield Metric('read_ios', int(port.readIops))
+        yield Metric('read_throughput', int(port.readBps))
+        yield Metric('read_latency', float(port.readLatency))
+        yield Metric('write_ios', int(port.writeIops))
+        yield Metric('write_throughput', int(port.writeBps))
+        yield Metric('write_latency', float(port.writeLatency))
 
         return
 
-    yield Result(state=State.UNKNOWN, summary='Disk %s not found.' % item)
+    yield Result(state=State.UNKNOWN, summary='Port %s not found.' % item)
 
 
 register.check_plugin(
-    name='dell_storage_disk',
-    service_name='Disk %s',
-    discovery_function=discovery_dell_storage_disk,
-    check_function=check_dell_storage_disk,
+    name='dell_storage_port',
+    service_name='Port %s',
+    discovery_function=discovery_dell_storage_port,
+    check_function=check_dell_storage_port,
 )

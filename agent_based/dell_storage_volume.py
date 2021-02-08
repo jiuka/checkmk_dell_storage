@@ -28,7 +28,7 @@ from .agent_based_api.v1 import (
     Metric,
 )
 from .utils.dell_storage import (
-    DSStatus
+    DSResult
 )
 
 
@@ -66,10 +66,7 @@ def check_dell_storage_volume(item, section):
         if not vol.name == item:
             continue
 
-        yield Result(state=DSStatus(vol.status), summary=f'{vol.status}')
-
-        if vol.statusMessage:
-            yield Result(state=State.OK, summary=f'({vol.statusMessage})')
+        yield from DSResult(vol)
 
         yield Metric('usage',
                      int(vol.activeSpace),
@@ -83,7 +80,7 @@ def check_dell_storage_volume(item, section):
 
         return
 
-    yield Result(state=State.UNKNOWN, summary='Sensor %s not found.' % item)
+    yield Result(state=State.UNKNOWN, summary='Volume %s not found.' % item)
 
 
 register.check_plugin(

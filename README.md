@@ -1,8 +1,27 @@
-# Checkmk extension for Phion-MIB
-
-Checks based on the Phion-MIB for the Barracuda CloudGen Firewall.
+# Checkmk extension for Dell Storage REST API
 
 ![build](https://github.com/jiuka/checkmk_phion/workflows/build/badge.svg)
 ![flake8](https://github.com/jiuka/checkmk_phion/workflows/Lint/badge.svg?branch=master)
 
-Description
+## Description
+
+Check Dell Storage Managed by the Dell Storage Manager with the Storage REST API. This Special Agent uses `piggyback` to return informations for different parts of the system.
+
+### Piggyback structure
+
+ * A node per StorageCenter
+   * State of the Storage Center
+   * State of the Controllers
+   * State of the Enclosures
+   * State of the Volumes
+ * A node per Controllers
+   * State of the Controller
+   * State of the Controller Ports
+   * State of the Controller Fans
+   * State of the Controller PSUs 
+   * State of the Controller Temperatures 
+ * A node per Enclosures
+   * State of the Enclosure
+   * State of the Enclosure Fans
+   * State of the Enclosure Disks
+   * State of the Enclosure Temperatures

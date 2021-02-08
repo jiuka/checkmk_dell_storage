@@ -103,7 +103,7 @@ class DellStorageApi:
             return self.__get_attr__(key)
 
         def __repr__(self):
-            return f'<{self.__class__.__name__} {self.instanceName}> {self.instanceId}'
+            return f'<{self.__class__.__name__} {self.instanceName} {self.instanceId}>'
 
         def _get_association(self, name, url):
             if not hasattr(self, f'_{name}'):
@@ -127,6 +127,15 @@ class DellStorageApi:
         serviceTag: str
         serialNumber: str
         version: str
+        chassisPresent: bool
+
+        @cached_property
+        def chassi(self):
+            return self._instanciate(self._api.get(f'/StorageCenter/StorageCenter/{self.instanceId}/Chassis'))
+
+        @cached_property
+        def objectCount(self):
+            return self._instanciate(self._api.get(f'/StorageCenter/StorageCenter/{self.instanceId}/ObjectCount'))
 
         def controllers(self):
             return self._get_association('controllers',
@@ -139,6 +148,68 @@ class DellStorageApi:
         def volumes(self):
             return self._get_association('volumes',
                                          f'/StorageCenter/StorageCenter/{self.instanceId}/VolumeList')
+
+        @property
+        def numberOfControllers(self):
+            return self.objectCount.numberOfControllers
+
+        @property
+        def numberOfDevicesInUse(self):
+            return self.objectCount.numberOfDevicesInUse
+
+        @property
+        def numberOfDisks(self):
+            return self.objectCount.numberOfDisks
+
+        @property
+        def numberOfLiveVolumes(self):
+            return self.objectCount.numberOfLiveVolumes
+
+        @property
+        def numberOfReplays(self):
+            return self.objectCount.numberOfReplays
+
+        @property
+        def numberOfReplications(self):
+            return self.objectCount.numberOfReplications
+
+        @property
+        def numberOfServers(self):
+            return self.objectCount.numberOfServers
+
+        @property
+        def numberOfVolumes(self):
+            return self.objectCount.numberOfVolumes
+
+    class ScChassis(ApiObject):
+        instanceId: str
+        instanceName: str
+
+        @cached_property
+        def enclosure(self):
+            return self._instanciate(self._api.get(f'/StorageCenter/ScChassis/{self.instanceId}/Enclosure'))
+
+        def fans(self):
+            return self._get_association('fans',
+                                         f'/StorageCenter/ScChassis/{self.instanceId}/FanSensorList')
+
+        def powersupplies(self):
+            return self._get_association('powersupplies',
+                                         f'/StorageCenter/ScChassis/{self.instanceId}/PowerSupplyList')
+
+        def temperatures(self):
+            return self._get_association('temperatures',
+                                         f'/StorageCenter/ScChassis/{self.instanceId}/TemperatureSensorList')
+
+    class ScObjectCount(ApiObject):
+        numberOfControllers: int
+        numberOfDevicesInUse: int
+        numberOfDisks: int
+        numberOfLiveVolumes: int
+        numberOfReplays: int
+        numberOfReplications: int
+        numberOfServers: int
+        numberOfVolumes: int
 
     class ScController(ApiObject):
         instanceId: str
@@ -169,6 +240,110 @@ class DellStorageApi:
             return self._get_association('temperatures',
                                          f'/StorageCenter/ScController/{self.instanceId}/TemperatureSensorList')
 
+    class ScControllerPort(ApiObject):
+        instanceId: str
+        instanceName: str
+        status: str
+        statusMessage: str
+        cabled: bool
+        transportType: str
+        wwn: str
+
+        @property
+        def readIops(self):
+            return self.iousage['readIops']
+
+        @property
+        def readBps(self):
+            return self.iousage['readKbPerSecond'] * 1024
+
+        @property
+        def readLatency(self):
+            return self.iousage['readLatency'] / 1000000.0
+
+        @property
+        def writeIops(self):
+            return self.iousage['writeIops']
+
+        @property
+        def writeBps(self):
+            return self.iousage['writeKbPerSecond'] * 1024
+
+        @property
+        def writeLatency(self):
+            return self.iousage['readLatency'] / 1000000.0
+
+        @property
+        def iousage(self):
+            if not hasattr(self, '_iousage'):
+
+                self._iousage = self._api.post(f'/StorageCenter/ScControllerPort/{self.instanceId}/GetHistoricalIoUsage',
+                                               payload=DellStorageApi.HISTORICAL_FILTER)[0]
+            return self._iousage
+
+    class ScControllerFanSensor(ApiObject):
+        instanceId: str
+        instanceName: str
+        status: str
+        statusMessage: str
+        location: str
+        currentRpm: int
+        lowerCriticalThreshold: str
+        lowerWarningThreshold: str
+        lowerNormalThreshold: str
+        upperNormalThreshold: str
+        upperWarningThreshold: str
+        upperCriticalThreshold: str
+
+    class ScControllerPowerSupply(ApiObject):
+        instanceId: str
+        instanceName: str
+        status: str
+        statusMessage: str
+        location: str
+
+    class ScControllerTemperatureSensor(ApiObject):
+        instanceId: str
+        instanceName: str
+        status: str
+        statusMessage: str
+        location: str
+        currentTemperature: str
+        lowerCriticalThreshold: str
+        lowerWarningThreshold: str
+        lowerNormalThreshold: str
+        upperNormalThreshold: str
+        upperWarningThreshold: str
+        upperCriticalThreshold: str
+
+        @property
+        def temperature(self):
+            return self.currentTemperature.split('°')[0]
+
+        @property
+        def lowerCrit(self):
+            return self.lowerCriticalThreshold.split('°')[0]
+
+        @property
+        def lowerWarn(self):
+            return self.lowerWarningThreshold.split('°')[0]
+
+        @property
+        def lowerNorm(self):
+            return self.lowerNormalThreshold.split('°')[0]
+
+        @property
+        def upperNorm(self):
+            return self.upperNormalThreshold.split('°')[0]
+
+        @property
+        def upperWarn(self):
+            return self.upperWarningThreshold.split('°')[0]
+
+        @property
+        def upperCrit(self):
+            return self.upperCriticalThreshold.split('°')[0]
+
     class ScEnclosure(ApiObject):
         instanceId: str
         instanceName: str
@@ -189,13 +364,77 @@ class DellStorageApi:
             return self._get_association('disks',
                                          f'/StorageCenter/ScEnclosure/{self.instanceId}/DiskList')
 
+        def powersupplies(self):
+            return self._get_association('powersupplies',
+                                         f'/StorageCenter/ScEnclosure/{self.instanceId}/PowerSupplyList')
+
         def temperatures(self):
             return self._get_association('temperatures',
                                          f'/StorageCenter/ScEnclosure/{self.instanceId}/TemperatureSensorList')
 
-        def powersupplies(self):
-            return self._get_association('powersupplies',
-                                         f'/StorageCenter/ScEnclosure/{self.instanceId}/PowerSupplyList')
+    class ScEnclosureCoolingFanSensor(ApiObject):
+        instanceId: str
+        instanceName: str
+        status: str
+        statusMessage: str
+        location: str
+
+    class ScDisk(ApiObject):
+        instanceId: str
+        instanceName: str
+        status: str
+        statusMessage: str
+
+        @property
+        def allocatedSpace(self):
+            return self.usage['allocatedSpace'].split(' ')[0]
+
+        @property
+        def totalSpace(self):
+            return self.usage['totalSpace'].split(' ')[0]
+
+        @property
+        def usage(self):
+            if not hasattr(self, '_usage'):
+                self._usage = self._api.get(f'/StorageCenter/ScDisk/{self.instanceId}/StorageUsage')
+            return self._usage
+
+        @property
+        def readIops(self):
+            return self.iousage['readIops']
+
+        @property
+        def readBps(self):
+            return self.iousage['readKbPerSecond'] * 1024
+
+        @property
+        def readLatency(self):
+            return self.iousage['readLatency'] / 1000000.0
+
+        @property
+        def writeIops(self):
+            return self.iousage['writeIops']
+
+        @property
+        def writeBps(self):
+            return self.iousage['writeKbPerSecond'] * 1024
+
+        @property
+        def writeLatency(self):
+            return self.iousage['readLatency'] / 1000000.0
+
+        @property
+        def iousage(self):
+            if not hasattr(self, '_iousage'):
+                self._iousage = self._api.post(f'/StorageCenter/ScDisk/{self.instanceId}/GetHistoricalIoUsage',
+                                               payload=DellStorageApi.HISTORICAL_FILTER)[0]
+            return self._iousage
+
+    class ScEnclosureTemperatureSensor(ScControllerTemperatureSensor):
+        pass
+
+    class ScEnclosurePowerSupply(ScControllerPowerSupply):
+        pass
 
     class ScVolume(ApiObject):
         instanceId: str
@@ -249,126 +488,6 @@ class DellStorageApi:
                                                payload=DellStorageApi.HISTORICAL_FILTER)[0]
             return self._iousage
 
-    class ScDisk(ApiObject):
-        instanceId: str
-        instanceName: str
-        status: str
-        statusMessage: str
-
-        @property
-        def allocatedSpace(self):
-            return self.usage['allocatedSpace'].split(' ')[0]
-
-        @property
-        def totalSpace(self):
-            return self.usage['totalSpace'].split(' ')[0]
-
-        @property
-        def usage(self):
-            if not hasattr(self, '_usage'):
-                self._usage = self._api.get(f'/StorageCenter/ScDisk/{self.instanceId}/StorageUsage')
-            return self._usage
-
-        @property
-        def readIops(self):
-            return self.iousage['readIops']
-
-        @property
-        def readBps(self):
-            return self.iousage['readKbPerSecond'] * 1024
-
-        @property
-        def readLatency(self):
-            return self.iousage['readLatency'] / 1000000.0
-
-        @property
-        def writeIops(self):
-            return self.iousage['writeIops']
-
-        @property
-        def writeBps(self):
-            return self.iousage['writeKbPerSecond'] * 1024
-
-        @property
-        def writeLatency(self):
-            return self.iousage['readLatency'] / 1000000.0
-
-        @property
-        def iousage(self):
-            if not hasattr(self, '_iousage'):
-                self._iousage = self._api.post(f'/StorageCenter/ScDisk/{self.instanceId}/GetHistoricalIoUsage',
-                                               payload=DellStorageApi.HISTORICAL_FILTER)[0]
-            return self._iousage
-
-    class ScEnclosureCoolingFanSensor(ApiObject):
-        instanceId: str
-        instanceName: str
-        status: str
-        statusMessage: str
-        location: str
-
-    class ScEnclosurePowerSupply(ApiObject):
-        instanceId: str
-        instanceName: str
-        status: str
-        statusMessage: str
-        location: str
-
-    class ScEnclosureTemperatureSensor(ApiObject):
-        instanceId: str
-        instanceName: str
-        status: str
-        statusMessage: str
-        location: str
-        currentTemperature: str
-        lowerCriticalThreshold: str
-        lowerWarningThreshold: str
-        upperWarningThreshold: str
-        upperCriticalThreshold: str
-
-        @property
-        def temperature(self):
-            return self.currentTemperature.split('°')[0]
-
-        @property
-        def lowerCrit(self):
-            return self.lowerCriticalThreshold.split('°')[0]
-
-        @property
-        def lowerWarn(self):
-            return self.lowerWarningThreshold.split('°')[0]
-
-        @property
-        def upperWarn(self):
-            return self.upperWarningThreshold.split('°')[0]
-
-        @property
-        def upperCrit(self):
-            return self.upperCriticalThreshold.split('°')[0]
-
-    class ScControllerTemperatureSensor(ScEnclosureTemperatureSensor):
-        pass
-
-    class ScControllerFanSensor(ApiObject):
-        instanceId: str
-        instanceName: str
-        status: str
-        statusMessage: str
-        location: str
-        lowerCriticalThreshold: str
-        lowerWarningThreshold: str
-        upperWarningThreshold: str
-        upperCriticalThreshold: str
-
-    class ScControllerPort(ApiObject):
-        instanceId: str
-        instanceName: str
-        status: str
-        statusMessage: str
-        cabled: bool
-        transportType: str
-        wwn: str
-
 
 class AgentDellStorage:
     def run(self):
@@ -405,6 +524,8 @@ class AgentDellStorage:
                 'instanceName', 'status', 'statusMessage',
                 'modelSeries', 'version',
                 'serviceTag', 'serialNumber',
+                'numberOfDevicesInUse', 'numberOfControllers', 'numberOfDisks', 'numberOfLiveVolumes',
+                'numberOfReplays', 'numberOfReplications', 'numberOfServers', 'numberOfVolumes',
             ])
 
             self.section('controller', storageCenter.controllers(), [
@@ -429,6 +550,30 @@ class AgentDellStorage:
 
             print('<<<<>>>>')
 
+            if storageCenter.chassisPresent:
+                self.piggyback(f'{storageCenter.instanceName}-{storageCenter.chassi.enclosure.instanceName}')
+                self.section('fan', storageCenter.chassi.fans(), [
+                    'instanceName', 'status', 'statusMessage',
+                    'location',
+                    'currentRpm',
+                    'lowerCriticalThreshold', 'lowerWarningThreshold', 'lowerNormalThreshold',
+                    'upperNormalThreshold', 'upperWarningThreshold', 'upperCriticalThreshold',
+                ])
+
+                self.section('psu', storageCenter.chassi.powersupplies(), [
+                    'instanceName', 'status', 'statusMessage',
+                    'location',
+                ])
+
+                self.section('temp', storageCenter.chassi.temperatures(), [
+                    'instanceName', 'status', 'statusMessage',
+                    'location',
+                    'temperature',
+                    'lowerCrit', 'lowerWarn', 'lowerNorm',
+                    'upperNorm', 'upperWarn', 'upperCrit',
+                ])
+                print('<<<<>>>>')
+
             for controller in storageCenter.controllers():
                 self.piggyback(f'{storageCenter.instanceName}-{controller.instanceName}')
                 self.section('controller', [controller], [
@@ -441,26 +586,29 @@ class AgentDellStorage:
                 self.section('port', controller.ports(), [
                     'instanceName', 'status', 'statusMessage',
                     'cabled', 'transportType', 'wwn',
+                    'readIops', 'readBps', 'readLatency',
+                    'writeIops', 'writeBps', 'writeLatency',
                 ])
 
                 self.section('fan', controller.fans(), [
                     'instanceName', 'status', 'statusMessage',
+                    'location',
+                    'currentRpm',
+                    'lowerCriticalThreshold', 'lowerWarningThreshold', 'lowerNormalThreshold',
+                    'upperNormalThreshold', 'upperWarningThreshold', 'upperCriticalThreshold',
                 ])
 
                 self.section('psu', controller.powersupplies(), [
                     'instanceName', 'status', 'statusMessage',
                     'location',
-                    'currentRpm',
-                    'lowerCriticalThreshold', 'lowerWarningThreshold',
-                    'upperWarningThreshold', 'upperCriticalThreshold',
                 ])
 
                 self.section('temp', controller.temperatures(), [
                     'instanceName', 'status', 'statusMessage',
                     'location',
                     'temperature',
-                    'lowerCrit', 'lowerWarn',
-                    'upperWarn', 'upperCrit',
+                    'lowerCrit', 'lowerWarn', 'lowerNorm',
+                    'upperNorm', 'upperWarn', 'upperCrit',
                 ])
             else:
                 print('<<<<>>>>')
@@ -485,17 +633,17 @@ class AgentDellStorage:
                     'writeIops', 'writeBps', 'writeLatency',
                 ])
 
+                self.section('psu', enclosure.powersupplies(), [
+                    'instanceName', 'status', 'statusMessage',
+                    'location',
+                ])
+
                 self.section('temp', enclosure.temperatures(), [
                     'instanceName', 'status', 'statusMessage',
                     'location',
                     'temperature',
-                    'lowerCrit', 'lowerWarn',
-                    'upperWarn', 'upperCrit',
-                ])
-
-                self.section('psu', enclosure.powersupplies(), [
-                    'instanceName', 'status', 'statusMessage',
-                    'location',
+                    'None', 'lowerCrit', 'lowerWarn',
+                    'upperWarn', 'upperCrit', 'None',
                 ])
             else:
                 print('<<<<>>>>')
@@ -508,7 +656,7 @@ class AgentDellStorage:
             return
         print('<<<dell_storage_{name}:sep({sep})>>>'.format(name=name, sep=ord(separator)))
         for instance in instances:
-            print(separator.join(map(lambda prop: str(getattr(instance, prop)), properties)))
+            print(separator.join(map(lambda prop: str(getattr(instance, prop, None)), properties)))
 
 
 if __name__ == '__main__':

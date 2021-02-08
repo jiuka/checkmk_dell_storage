@@ -27,7 +27,7 @@ from .agent_based_api.v1 import (
     State,
 )
 from .utils.dell_storage import (
-    DSStatus
+    DSResult
 )
 
 
@@ -60,21 +60,18 @@ def discovery_dell_storage_controller(section):
 
 
 def check_dell_storage_controller(item, section):
-    for sc in section:
-        if not sc.name == item:
+    for ctrl in section:
+        if not ctrl.name == item:
             continue
 
-        yield Result(state=DSStatus(sc.status), summary=f'{sc.status}')
+        yield from DSResult(ctrl)
 
-        if sc.statusMessage:
-            yield Result(state=State.OK, summary=f'({sc.statusMessage})')
-
-        yield Result(state=State.OK, summary=f'Model: {sc.modelSeries} v{sc.version}')
-        yield Result(state=State.OK, summary=f'ST: {sc.serviceTag}')
-        yield Result(state=State.OK, summary=f'SN: {sc.serialNumber}')
+        yield Result(state=State.OK, summary=f'Model: {ctrl.modelSeries} v{ctrl.version}')
+        yield Result(state=State.OK, summary=f'ST: {ctrl.serviceTag}')
+        yield Result(state=State.OK, summary=f'SN: {ctrl.serialNumber}')
         return
 
-    yield Result(state=State.UNKNOWN, summary='Sensor %s not found.' % item)
+    yield Result(state=State.UNKNOWN, summary='Controller %s not found.' % item)
 
 
 register.check_plugin(
