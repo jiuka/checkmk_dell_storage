@@ -1,7 +1,7 @@
 # Checkmk extension for Dell Storage REST API
 
-![build](https://github.com/jiuka/checkmk_phion/workflows/build/badge.svg)
-![flake8](https://github.com/jiuka/checkmk_phion/workflows/Lint/badge.svg?branch=master)
+![build](https://github.com/jiuka/checkmk_dell_storage/workflows/build/badge.svg)
+![flake8](https://github.com/jiuka/checkmk_dell_storage/workflows/Lint/badge.svg?branch=master)
 
 ## Description
 
@@ -18,10 +18,11 @@ Check Dell Storage Managed by the Dell Storage Manager with the Storage REST API
    * State of the Controller
    * State of the Controller Ports
    * State of the Controller Fans
-   * State of the Controller PSUs 
-   * State of the Controller Temperatures 
+   * State of the Controller PSUs
+   * State of the Controller Temperatures
  * A node per Enclosures
    * State of the Enclosure
    * State of the Enclosure Fans
    * State of the Enclosure Disks
+   * State of the Controller PSUs
    * State of the Enclosure Temperatures
