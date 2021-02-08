@@ -21,6 +21,7 @@
 
 from typing import NamedTuple
 from .agent_based_api.v1 import (
+    Metric,
     register,
     Result,
     Service,
@@ -75,7 +76,6 @@ def check_dell_storage_center(item, section):
         yield Result(state=State.OK, summary=f'ST: {sc.serviceTag}')
         yield Result(state=State.OK, summary=f'SN: {sc.serialNumber}')
 
-        
         yield Metric('controller', float(sc.numberOfControllers))
         yield Metric('device', float(sc.numberOfDevicesInUse))
         yield Metric('disk', float(sc.numberOfDisks))

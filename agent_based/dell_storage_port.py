@@ -46,6 +46,7 @@ class ScPort(NamedTuple):
     writeBps: str
     writeLatency: str
 
+
 def parse_dell_storage_port(string_table):
     return [ScPort(*port) for port in string_table]
 
