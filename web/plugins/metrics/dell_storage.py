@@ -1,7 +1,9 @@
 #!/usr/bin/python
 # -*- encoding: utf-8; py-indent-offset: 4 -*-
 #
-# Copyright (C) 2020  Marius Rieder <marius.rieder@durchmesser.ch>
+# checkmk_dell_storage - Checkmk extension for Dell Storage API
+#
+# Copyright (C) 2021  Marius Rieder <marius.rieder@scs.ch>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License

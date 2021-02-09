@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-# # -*- encoding: utf-8; py-indent-offset: 4 -*-
+# -*- encoding: utf-8; py-indent-offset: 4 -*-
 #
-# checkmk_dell_rackpdu - Checkmk extension for Dell Rack PDUs
+# checkmk_dell_storage - Checkmk extension for Dell Storage API
 #
 # Copyright (C) 2021  Marius Rieder <marius.rieder@scs.ch>
 #

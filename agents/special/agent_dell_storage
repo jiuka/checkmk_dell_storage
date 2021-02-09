@@ -458,7 +458,7 @@ class DellStorageApi:
             'message',
             'acknowledged',
             'supportUrl',
-        ] 
+        ]
 
         alertDefinition: str
         message: str
