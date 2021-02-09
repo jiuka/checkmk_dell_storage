@@ -19,14 +19,16 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+import time
 from typing import NamedTuple
 from .agent_based_api.v1 import (
-    Metric,
+    get_value_store,
     register,
     Result,
     Service,
     State,
 )
+from .utils import diskstat
 from .utils.dell_storage import (
     DSResult
 )
@@ -62,7 +64,7 @@ def discovery_dell_storage_port(section):
         yield Service(item=port.name)
 
 
-def check_dell_storage_port(item, section):
+def check_dell_storage_port(item, params, section):
     for port in section:
         if not port.name == item:
             continue
@@ -73,16 +75,22 @@ def check_dell_storage_port(item, section):
         yield Result(state=State.OK, summary=f'Type: {port.type}')
         yield Result(state=State.OK, summary=f'WWN: {port.wwn}')
 
-        yield Metric('read_ios', int(port.readIops))
-        yield Metric('read_throughput', int(port.readBps))
-        yield Metric('read_latency', float(port.readLatency))
-        yield Metric('write_ios', int(port.writeIops))
-        yield Metric('write_throughput', int(port.writeBps))
-        yield Metric('write_latency', float(port.writeLatency))
+        value_store = get_value_store()
+        yield from diskstat.check_diskstat_dict(
+            params=params,
+            disk={
+                'read_ios': int(port.readIops),
+                'read_throughput': int(port.readBps),
+                'read_latency': float(port.readLatency),
+                'write_ios': int(port.writeIops),
+                'write_throughput': int(port.writeBps),
+                'write_latency': float(port.writeLatency),
+            },
+            value_store=value_store,
+            this_time=time.time(),
+        )
 
         return
-
-    yield Result(state=State.UNKNOWN, summary='Port %s not found.' % item)
 
 
 register.check_plugin(
@@ -90,4 +98,6 @@ register.check_plugin(
     service_name='Port %s',
     discovery_function=discovery_dell_storage_port,
     check_function=check_dell_storage_port,
+    check_ruleset_name='diskstat',
+    check_default_parameters={},
 )

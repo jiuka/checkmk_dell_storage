@@ -38,13 +38,6 @@ check_metrics['check_mk-dell_storage_disk'] = {
     'usage': {'name': 'dell_storage_disk_usage'},
 }
 
-check_metrics['check_mk-dell_storage_port'] = {
-    'read_ios': {'name': 'dell_storage_port_read_ios'},
-    'read_throughput': {'name': 'dell_storage_port_read_throughput'},
-    'write_ios': {'name': 'dell_storage_port_write_ios'},
-    'write_throughput': {'name': 'dell_storage_port_write_throughput'},
-}
-
 check_metrics['check_mk-dell_storage_volume'] = {
     'usage': {'name': 'dell_storage_volume_usage'},
 }
@@ -67,10 +60,6 @@ metric_info['dell_storage_center_live_volume'] = {
     'color': '#c04080',
 }
 
-metric_info['dell_storage_port_read_ios'] = metric_info['disk_read_ios']
-metric_info['dell_storage_port_write_ios'] = metric_info['disk_write_ios']
-metric_info['dell_storage_port_read_throughput'] = metric_info['disk_read_throughput']
-metric_info['dell_storage_port_write_throughput'] = metric_info['disk_write_throughput']
 
 metric_info['dell_storage_disk_usage'] = {
     'title': _('Disk Usage'),
@@ -99,22 +88,6 @@ graph_info['dell_storage_disk_usage'] = {
         ('dell_storage_disk_usage', 'area'),
     ],
     'range': (0, 'dell_storage_disk_usage:max'),
-}
-
-graph_info['dell_storage_port_ios'] = {
-    'title': _('Port I/O operations'),
-    'metrics': [
-        ('dell_storage_port_read_ios', 'area'),
-        ('dell_storage_port_write_ios', '-area'),
-    ],
-}
-
-graph_info['dell_storage_port_throughput'] = {
-    'title': _('Port throughput'),
-    'metrics': [
-        ('dell_storage_port_read_throughput', 'area'),
-        ('dell_storage_port_write_throughput', '-area'),
-    ],
 }
 
 graph_info['dell_storage_volume_usage'] = {

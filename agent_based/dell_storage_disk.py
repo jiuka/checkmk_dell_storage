@@ -19,14 +19,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+import time
 from typing import NamedTuple
 from .agent_based_api.v1 import (
-    register,
-    Result,
-    Service,
-    State,
+    get_value_store,
     Metric,
+    register,
+    Service,
 )
+from .utils import diskstat
 from .utils.dell_storage import (
     DSResult
 )
@@ -61,7 +62,7 @@ def discovery_dell_storage_disk(section):
         yield Service(item=disk.name)
 
 
-def check_dell_storage_disk(item, section):
+def check_dell_storage_disk(item, params, section):
     for disk in section:
         if not disk.name == item:
             continue
@@ -71,16 +72,23 @@ def check_dell_storage_disk(item, section):
         yield Metric('usage',
                      int(disk.allocatedSpace),
                      boundaries=(0, int(disk.totalSpace)))
-        yield Metric('disk_read_ios', int(disk.readIops))
-        yield Metric('disk_read_throughput', int(disk.readBps))
-        yield Metric('read_latency', float(disk.readLatency))
-        yield Metric('disk_write_ios', int(disk.writeIops))
-        yield Metric('disk_write_throughput', int(disk.writeBps))
-        yield Metric('write_latency', float(disk.writeLatency))
+
+        value_store = get_value_store()
+        yield from diskstat.check_diskstat_dict(
+            params=params,
+            disk={
+                'read_ios': int(disk.readIops),
+                'read_throughput': int(disk.readBps),
+                'read_latency': float(disk.readLatency),
+                'write_ios': int(disk.writeIops),
+                'write_throughput': int(disk.writeBps),
+                'write_latency': float(disk.writeLatency),
+            },
+            value_store=value_store,
+            this_time=time.time(),
+        )
 
         return
-
-    yield Result(state=State.UNKNOWN, summary='Disk %s not found.' % item)
 
 
 register.check_plugin(
@@ -88,4 +96,6 @@ register.check_plugin(
     service_name='Disk %s',
     discovery_function=discovery_dell_storage_disk,
     check_function=check_dell_storage_disk,
+    check_ruleset_name='diskstat',
+    check_default_parameters={},
 )

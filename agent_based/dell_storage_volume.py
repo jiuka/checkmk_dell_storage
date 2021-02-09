@@ -19,14 +19,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+import time
 from typing import NamedTuple
 from .agent_based_api.v1 import (
-    register,
-    Result,
-    Service,
-    State,
+    get_value_store,
     Metric,
+    register,
+    Service,
 )
+from .utils import diskstat
 from .utils.dell_storage import (
     DSResult
 )
@@ -61,7 +62,7 @@ def discovery_dell_storage_volume(section):
         yield Service(item=vol.name)
 
 
-def check_dell_storage_volume(item, section):
+def check_dell_storage_volume(item, params, section):
     for vol in section:
         if not vol.name == item:
             continue
@@ -71,16 +72,23 @@ def check_dell_storage_volume(item, section):
         yield Metric('usage',
                      int(vol.activeSpace),
                      boundaries=(0, int(vol.configuredSpace)))
-        yield Metric('disk_read_ios', int(vol.readIops))
-        yield Metric('disk_read_throughput', int(vol.readBps))
-        yield Metric('read_latency', float(vol.readLatency))
-        yield Metric('disk_write_ios', int(vol.writeIops))
-        yield Metric('disk_write_throughput', int(vol.writeBps))
-        yield Metric('write_latency', float(vol.writeLatency))
+
+        value_store = get_value_store()
+        yield from diskstat.check_diskstat_dict(
+            params=params,
+            disk={
+                'read_ios': int(vol.readIops),
+                'read_throughput': int(vol.readBps),
+                'read_latency': float(vol.readLatency),
+                'write_ios': int(vol.writeIops),
+                'write_throughput': int(vol.writeBps),
+                'write_latency': float(vol.writeLatency),
+            },
+            value_store=value_store,
+            this_time=time.time(),
+        )
 
         return
-
-    yield Result(state=State.UNKNOWN, summary='Volume %s not found.' % item)
 
 
 register.check_plugin(
@@ -88,4 +96,6 @@ register.check_plugin(
     service_name='Volume %s',
     discovery_function=discovery_dell_storage_volume,
     check_function=check_dell_storage_volume,
+    check_ruleset_name='diskstat',
+    check_default_parameters={},
 )
