@@ -25,7 +25,14 @@ from cmk.gui.plugins.metrics import (
     check_metrics,
     metric_info,
     graph_info,
+    perfometer_info,
 )
+
+check_metrics['check_mk-dell_storage_center'] = {
+    'disk': {'name': 'dell_storage_center_disk'},
+    'volume': {'name': 'dell_storage_center_volume'},
+    'live_volume': {'name': 'dell_storage_center_live_volume'},
+}
 
 check_metrics['check_mk-dell_storage_disk'] = {
     'usage': {'name': 'dell_storage_disk_usage'},
@@ -42,7 +49,25 @@ check_metrics['check_mk-dell_storage_volume'] = {
     'usage': {'name': 'dell_storage_volume_usage'},
 }
 
-metric_info['dell_storage_port_read_ios'] = metric_info['disk_write_ios']
+metric_info['dell_storage_center_disk'] = {
+    'title': _('Disks'),
+    'unit': 'count',
+    'color': '#40c080',
+}
+
+metric_info['dell_storage_center_volume'] = {
+    'title': _('Volumes'),
+    'unit': 'count',
+    'color': '#4080c0',
+}
+
+metric_info['dell_storage_center_live_volume'] = {
+    'title': _('Live Volumes'),
+    'unit': 'count',
+    'color': '#c04080',
+}
+
+metric_info['dell_storage_port_read_ios'] = metric_info['disk_read_ios']
 metric_info['dell_storage_port_write_ios'] = metric_info['disk_write_ios']
 metric_info['dell_storage_port_read_throughput'] = metric_info['disk_read_throughput']
 metric_info['dell_storage_port_write_throughput'] = metric_info['disk_write_throughput']
@@ -57,6 +82,15 @@ metric_info['dell_storage_volume_usage'] = {
     'title': _('Volume Usage'),
     'unit': 'bytes',
     'color': '#a05830',
+}
+
+graph_info['dell_storage_center_disk'] = {
+    'title': _('Storage Center Disks'),
+    'metrics': [
+        ('dell_storage_center_disk', 'line'),
+        ('dell_storage_center_volume', 'line'),
+        ('dell_storage_center_live_volume', 'line'),
+    ],
 }
 
 graph_info['dell_storage_disk_usage'] = {
@@ -90,3 +124,18 @@ graph_info['dell_storage_volume_usage'] = {
     ],
     'range': (0, 'dell_storage_volume_usage:max'),
 }
+
+perfometer_info.append({
+    'type': 'stacked',
+    'perfometers': [{
+        'type': 'logarithmic',
+        'metric': 'dell_storage_center_disk',
+        'half_value': 10,
+        'exponent': 2,
+    }, {
+        'type': 'logarithmic',
+        'metric': 'dell_storage_center_volume',
+        'half_value': 10,
+        'exponent': 2
+    }],
+})
