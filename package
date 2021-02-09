@@ -4,6 +4,7 @@
     'download_url': 'https://github.com/jiuka/checkmk_dell_storage/releases',
     'files': {
         'agent_based': [
+            'dell_storage_agent.py',
             'dell_storage_alert.py',
             'dell_storage_center.py',
             'dell_storage_controller.py',

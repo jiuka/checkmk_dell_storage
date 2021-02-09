@@ -21,10 +21,10 @@
 
 from typing import Optional, Sequence
 import re
+import time
 import datetime
 import logging
 import requests
-from textwrap import dedent
 from functools import cached_property
 
 from cmk.special_agents.utils.agent_common import (
@@ -62,6 +62,8 @@ class DellStorageApiParser:
 
 
 class DellStorageApi:
+    reqcnt = 0
+
     HISTORICAL_FILTER = {
         'HistoricalFilter': {
             'UseCurrent': True,
@@ -97,6 +99,7 @@ class DellStorageApi:
         resp = self._connection.request(methode, url, json=payload, verify=self._verify_cert, **kwargs)
         LOGGING.debug('<< {status} {reason}'.format(status=resp.status_code, reason=resp.reason))
         resp.raise_for_status()
+        self.reqcnt += 1
         return resp.json()
 
     def url(self, call):
@@ -112,6 +115,14 @@ class DellStorageApi:
 
     def post(self, call, payload={}) -> requests.Response:
         return self._request('POST', call, payload=payload)
+
+    @property
+    def provider(self):
+        return getattr(self, '_api', {}).get('provider', 'UNKNOWN')
+
+    @property
+    def providerVersion(self):
+        return getattr(self, '_api', {}).get('providerVersion', 'UNKNOWN')
 
     class ApiObject(object):
         AGENT_DEFAULT_FIELDS = ['instanceName', 'status', 'statusMessage']
@@ -487,64 +498,76 @@ class AgentDellStorage:
     def main(self, args: Args):
         self.args = args
 
-        self._api = DellStorageApi(args.url, args.user, args.password, args.verify_cert)
+        start = time.time()
 
-        print(dedent('''\
-                <<<check_mk>>>
-                Version: {providerVersion}
-                AgentOS: {provider}
-                '''.format(**self._api._api)))
+        print('<<<check_mk>>>')
 
-        for storageCenter in self._api.storage_centers:
-            self.piggyback(storageCenter.instanceName)
-            self.section('center', [storageCenter])
+        try:
+            self._api = DellStorageApi(args.url, args.user, args.password, args.verify_cert)
 
-            self.section('controller', storageCenter.controllers)
+            print(f'Version: {self._api.providerVersion}')
+            print(f'AgentOS: {self._api.provider}')
 
-            self.section('enclosure', storageCenter.enclosures)
+            for storageCenter in self._api.storage_centers:
+                self.piggyback(storageCenter.instanceName)
+                self.section('center', [storageCenter])
 
-            self.section('volume', storageCenter.volumes)
+                self.section('controller', storageCenter.controllers)
 
-            self.section('alert', storageCenter.activeAlerts, force=True)
+                self.section('enclosure', storageCenter.enclosures)
 
-            print('<<<<>>>>')
+                self.section('volume', storageCenter.volumes)
 
-            if storageCenter.chassisPresent:
-                self.piggyback(f'{storageCenter.instanceName}-{storageCenter.chassi.enclosure.instanceName}')
-                self.section('fan', storageCenter.chassi.fans)
+                self.section('alert', storageCenter.activeAlerts, force=True)
 
-                self.section('psu', storageCenter.chassi.powersupplies)
-
-                self.section('temp', storageCenter.chassi.temperatures)
                 print('<<<<>>>>')
 
-            for controller in storageCenter.controllers:
-                self.piggyback(f'{storageCenter.instanceName}-{controller.instanceName}')
-                self.section('controller', [controller])
+                if storageCenter.chassisPresent:
+                    self.piggyback(f'{storageCenter.instanceName}-{storageCenter.chassi.enclosure.instanceName}')
+                    self.section('fan', storageCenter.chassi.fans)
 
-                self.section('port', controller.ports)
+                    self.section('psu', storageCenter.chassi.powersupplies)
 
-                self.section('fan', controller.fans)
+                    self.section('temp', storageCenter.chassi.temperatures)
+                    print('<<<<>>>>')
 
-                self.section('psu', controller.powersupplies)
+                for controller in storageCenter.controllers:
+                    self.piggyback(f'{storageCenter.instanceName}-{controller.instanceName}')
+                    self.section('controller', [controller])
 
-                self.section('temp', controller.temperatures)
-            else:
-                print('<<<<>>>>')
+                    self.section('port', controller.ports)
 
-            for enclosure in storageCenter.enclosures:
-                self.piggyback(f'{storageCenter.instanceName}-{enclosure.instanceName}')
-                self.section('enclosure', [enclosure])
+                    self.section('fan', controller.fans)
 
-                self.section('fan', enclosure.fans)
+                    self.section('psu', controller.powersupplies)
 
-                self.section('disk', enclosure.disks)
+                    self.section('temp', controller.temperatures)
+                else:
+                    print('<<<<>>>>')
 
-                self.section('psu', enclosure.powersupplies)
+                for enclosure in storageCenter.enclosures:
+                    self.piggyback(f'{storageCenter.instanceName}-{enclosure.instanceName}')
+                    self.section('enclosure', [enclosure])
 
-                self.section('temp', enclosure.temperatures)
-            else:
-                print('<<<<>>>>')
+                    self.section('fan', enclosure.fans)
+
+                    self.section('disk', enclosure.disks)
+
+                    self.section('psu', enclosure.powersupplies)
+
+                    self.section('temp', enclosure.temperatures)
+                else:
+                    print('<<<<>>>>')
+        except Exception as exc:
+            if args.debug:
+                raise
+            end = time.time()
+            print('<<<dell_storage_agent:sep(59)>>>')
+            print(f'1;;;{end-start};;{exc}')
+        else:
+            end = time.time()
+            print('<<<dell_storage_agent:sep(59)>>>')
+            print(f'0;{self._api.provider};{self._api.providerVersion};{end-start};{self._api.reqcnt};')
 
     def piggyback(self, name=None):
         print(f'<<<<{re.sub(r"[^a-zA-Z0-9-_]", "", name)}>>>>')
