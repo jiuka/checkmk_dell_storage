@@ -20,10 +20,10 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 import pytest  # type: ignore[import]
-import requests
+import requests  # noqa: F401
 
 from importlib.util import spec_from_loader, module_from_spec
-from importlib.machinery import SourceFileLoader 
+from importlib.machinery import SourceFileLoader
 
 spec = spec_from_loader("agent_dell_storage", SourceFileLoader("agent_dell_storage", "agents/special/agent_dell_storage"))
 agent_dell_storage = module_from_spec(spec)

@@ -22,14 +22,15 @@
 import re
 import os.path
 import pytest  # type: ignore[import]
-import requests
+import requests  # noqa: F401
 
 from importlib.util import spec_from_loader, module_from_spec
-from importlib.machinery import SourceFileLoader 
+from importlib.machinery import SourceFileLoader
 
 spec = spec_from_loader("agent_dell_storage", SourceFileLoader("agent_dell_storage", "agents/special/agent_dell_storage"))
 agent_dell_storage = module_from_spec(spec)
 spec.loader.exec_module(agent_dell_storage)
+
 
 def text_callback(request, context):
     path = os.path.abspath(os.path.join(__file__, '../fixtures', request.url[25:]))
@@ -39,6 +40,7 @@ def text_callback(request, context):
     else:
         context.status_code = 404
         return '404'
+
 
 @pytest.fixture
 def api(requests_mock):
@@ -55,6 +57,7 @@ class Args:
     password = 'pass'
     verify_cert = True
     debug = True
+
 
 def test_AgentDellStorage_main(capsys, api):
     agent = agent_dell_storage.AgentDellStorage()
