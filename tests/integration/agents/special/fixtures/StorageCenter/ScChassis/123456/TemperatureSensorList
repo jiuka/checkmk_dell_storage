@@ -1,0 +1,42 @@
+[
+    {
+        "name": "Ambient",
+        "lowerNormalThreshold": "3° C / 37° F",
+        "upperNormalThreshold": "42° C / 108° F",
+        "present": true,
+        "upperCriticalThreshold": "127° C / 261° F",
+        "currentTemperature": "19° C / 66° F",
+        "lowerCriticalThreshold": "-128° C / -198° F",
+        "sensorDataSource": "Controller",
+        "upperWarningThreshold": "47° C / 117° F",
+        "lowerWarningThreshold": "-7° C / 19° F",
+        "objectType": "ScControllerTemperatureSensor",
+        "instanceId": "123456.123456.12",
+        "instanceName": "Ambient",
+        "status": "Up",
+        "childStatus": "Up",
+        "statusMessage": "",
+        "scSerialNumber": 123456,
+        "scName": "SAN"
+    },
+    {
+        "name": "Midplane One",
+        "lowerNormalThreshold": "3° C / 37° F",
+        "upperNormalThreshold": "48° C / 118° F",
+        "present": true,
+        "upperCriticalThreshold": "127° C / 261° F",
+        "currentTemperature": "21° C / 70° F",
+        "lowerCriticalThreshold": "-128° C / -198° F",
+        "sensorDataSource": "Controller",
+        "upperWarningThreshold": "53° C / 127° F",
+        "lowerWarningThreshold": "-7° C / 19° F",
+        "objectType": "ScControllerTemperatureSensor",
+        "instanceId": "123456.123456.13",
+        "instanceName": "Midplane One",
+        "status": "Up",
+        "childStatus": "Up",
+        "statusMessage": "",
+        "scSerialNumber": 123456,
+        "scName": "SAN"
+    }
+]

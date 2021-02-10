@@ -1,0 +1,36 @@
+[
+    {
+        "name": "Power Supply 1",
+        "controllerIndex": 123456,
+        "failed": false,
+        "powerSwitchState": "On",
+        "acPowerLost": false,
+        "present": true,
+        "sensorDataSource": "Controller",
+        "objectType": "ScControllerPowerSupply",
+        "instanceId": "123456.123456.1",
+        "instanceName": "PowerSupply1",
+        "status": "Up",
+        "childStatus": "Up",
+        "statusMessage": "",
+        "scSerialNumber": 123456,
+        "scName": "SAN"
+    },
+    {
+        "name": "Power Supply 2",
+        "controllerIndex": 123456,
+        "failed": false,
+        "powerSwitchState": "On",
+        "acPowerLost": false,
+        "present": true,
+        "sensorDataSource": "Controller",
+        "objectType": "ScControllerPowerSupply",
+        "instanceId": "123456.123456.2",
+        "instanceName": "PowerSupply2",
+        "status": "Up",
+        "childStatus": "Up",
+        "statusMessage": "",
+        "scSerialNumber": 123456,
+        "scName": "SAN"
+    }
+]

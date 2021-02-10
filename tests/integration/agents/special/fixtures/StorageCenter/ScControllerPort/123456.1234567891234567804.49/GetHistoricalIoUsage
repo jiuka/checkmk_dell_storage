@@ -1,0 +1,19 @@
+[
+    {
+        "time": "1970-01-01T01:00:00+01:00",
+        "averageKbPerIo": 18,
+        "readKbPerSecond": 642,
+        "writeKbPerSecond": 2294,
+        "totalKbPerSecond": 2936,
+        "readLatency": 2293,
+        "writeLatency": 584,
+        "totalIops": 161,
+        "writeIops": 148,
+        "readIops": 13,
+        "scSerialNumber": 123456,
+        "scName": "SAN",
+        "objectType": "ScControllerPortIoUsage",
+        "instanceId": "123456.1234567891234567804",
+        "instanceName": "5555555555555518"
+    }
+]

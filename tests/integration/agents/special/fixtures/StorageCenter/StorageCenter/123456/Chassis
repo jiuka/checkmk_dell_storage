@@ -1,0 +1,7 @@
+{
+    "scSerialNumber": 123456,
+    "scName": "SAN",
+    "objectType": "ScChassis",
+    "instanceId": "123456",
+    "instanceName": "SAN"
+}

@@ -1,0 +1,40 @@
+[
+    {
+        "name": "CPU One",
+        "lowerNormalThreshold": "8° C / 46° F",
+        "upperNormalThreshold": "92° C / 198° F",
+        "present": true,
+        "upperCriticalThreshold": "127° C / 261° F",
+        "currentTemperature": "45° C / 113° F",
+        "lowerCriticalThreshold": "-128° C / -198° F",
+        "sensorDataSource": "Controller",
+        "upperWarningThreshold": "97° C / 207° F",
+        "lowerWarningThreshold": "3° C / 37° F",
+        "objectType": "ScControllerTemperatureSensor",
+        "instanceId": "123456.123456.24",
+        "instanceName": "CPU One",
+        "status": "Up",
+        "statusMessage": "",
+        "scSerialNumber": 123456,
+        "scName": "SAN"
+    },
+    {
+        "name": "BBU",
+        "lowerNormalThreshold": "10° C / 50° F",
+        "upperNormalThreshold": "55° C / 131° F",
+        "present": true,
+        "upperCriticalThreshold": "127° C / 261° F",
+        "currentTemperature": "27° C / 81° F",
+        "lowerCriticalThreshold": "-128° C / -198° F",
+        "sensorDataSource": "Controller",
+        "upperWarningThreshold": "65° C / 149° F",
+        "lowerWarningThreshold": "-7° C / 19° F",
+        "objectType": "ScControllerTemperatureSensor",
+        "instanceId": "123456.123456.11",
+        "instanceName": "BBU",
+        "status": "Up",
+        "statusMessage": "",
+        "scSerialNumber": 123456,
+        "scName": "SAN"
+    }
+]

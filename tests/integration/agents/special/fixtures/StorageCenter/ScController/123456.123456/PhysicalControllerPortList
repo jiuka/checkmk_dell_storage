@@ -1,0 +1,54 @@
+[
+    {
+        "name": "5555555555555518",
+        "controller": {
+            "instanceId": "123456.123456",
+            "instanceName": "Top Controller",
+            "objectType": "ScController"
+        },
+        "virtual": false,
+        "transportType": "Iscsi",
+        "purpose": "FrontEnd",
+        "iscsiName": "iqn.2002-03.com.compellent:5000d310055e9018",
+        "iscsiIpAddress": "10.0.0.10",
+        "embedded": false,
+        "wwn": "5555555555555518",
+        "cabled": true,
+        "iscsiGateway": "0.0.0.0",
+        "frontEndCapable": true,
+        "iscsiSubnetMask": "255.255.255.0",
+        "status": "Up",
+        "statusMessage": "",
+        "scSerialNumber": 123456,
+        "scName": "SAN",
+        "objectType": "ScControllerPort",
+        "instanceId": "123456.1234567891234567804.49",
+        "instanceName": "5555555555555518"
+    },
+    {
+        "name": "5555555555555516",
+        "controller": {
+            "instanceId": "123456.123456",
+            "instanceName": "Top Controller",
+            "objectType": "ScController"
+        },
+        "virtual": false,
+        "transportType": "Iscsi",
+        "purpose": "FrontEnd",
+        "iscsiName": "iqn.2002-03.com.compellent:5000d310055e9016",
+        "iscsiIpAddress": "10.0.0.11",
+        "embedded": false,
+        "wwn": "5555555555555516",
+        "cabled": true,
+        "iscsiGateway": "0.0.0.0",
+        "frontEndCapable": true,
+        "iscsiSubnetMask": "255.255.255.0",
+        "status": "Up",
+        "statusMessage": "",
+        "scSerialNumber": 123456,
+        "scName": "SAN",
+        "objectType": "ScControllerPort",
+        "instanceId": "123456.1234567891234567802.45",
+        "instanceName": "5555555555555516"
+    }
+]

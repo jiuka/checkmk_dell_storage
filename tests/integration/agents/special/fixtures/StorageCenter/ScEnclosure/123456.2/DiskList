@@ -1,0 +1,100 @@
+[
+    {
+        "estimatedWearDate": "1970-01-01T01:00:00+01:00",
+        "healthMask": [
+            "Healthy"
+        ],
+        "lastRekeyDate": "1970-01-01T01:00:00+01:00",
+        "name": "02-06",
+        "size": "1800360124416 Bytes",
+        "locked": false,
+        "product": "AB1234CD5678    ",
+        "managed": true,
+        "secured": false,
+        "enclosureIndex": 2,
+        "revision": "AB1C",
+        "healthy": true,
+        "diskClass": {
+            "instanceId": "123456.2",
+            "instanceName": "10K",
+            "objectType": "ScDiskClass"
+        },
+        "spare": false,
+        "diskFolder": {
+            "instanceId": "123456.3",
+            "instanceName": "Assigned",
+            "objectType": "ScDiskFolder"
+        },
+        "diskFolderIndex": 3,
+        "estimatedWearWarningEndurance": 0,
+        "userConsumableSize": "1800360108032 Bytes",
+        "markedForRemoval": false,
+        "diskEraseCapability": "None",
+        "diskClassIndex": 2,
+        "enclosurePosition": 6,
+        "powerOnTimeHours": 26890,
+        "secureDataAllowed": false,
+        "controlType": "Managed",
+        "markedForSpare": false,
+        "reportsWear": false,
+        "endurance": 0,
+        "ssd": false,
+        "status": "Up",
+        "childStatus": "Up",
+        "statusMessage": "",
+        "scSerialNumber": 123456,
+        "scName": "SAN",
+        "objectType": "ScDisk",
+        "instanceId": "123456.1",
+        "instanceName": "02-06"
+    },
+    {
+        "estimatedWearDate": "1970-01-01T01:00:00+01:00",
+        "healthMask": [
+            "Healthy"
+        ],
+        "lastRekeyDate": "1970-01-01T01:00:00+01:00",
+        "name": "02-22",
+        "size": "1800360124416 Bytes",
+        "locked": false,
+        "product": "AB1234CD5679    ",
+        "managed": true,
+        "secured": false,
+        "enclosureIndex": 2,
+        "revision": "AB1C",
+        "healthy": true,
+        "diskClass": {
+            "instanceId": "123456.2",
+            "instanceName": "10K",
+            "objectType": "ScDiskClass"
+        },
+        "spare": false,
+        "diskFolder": {
+            "instanceId": "123456.3",
+            "instanceName": "Assigned",
+            "objectType": "ScDiskFolder"
+        },
+        "diskFolderIndex": 3,
+        "estimatedWearWarningEndurance": 0,
+        "userConsumableSize": "1800360108032 Bytes",
+        "markedForRemoval": false,
+        "diskEraseCapability": "None",
+        "diskClassIndex": 2,
+        "enclosurePosition": 22,
+        "powerOnTimeHours": 26890,
+        "secureDataAllowed": false,
+        "controlType": "Managed",
+        "markedForSpare": false,
+        "reportsWear": false,
+        "endurance": 0,
+        "ssd": false,
+        "status": "Up",
+        "childStatus": "Up",
+        "statusMessage": "",
+        "scSerialNumber": 123456,
+        "scName": "SAN",
+        "objectType": "ScDisk",
+        "instanceId": "123456.10",
+        "instanceName": "02-22"
+    }
+]
