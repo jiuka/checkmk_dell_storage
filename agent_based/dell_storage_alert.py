@@ -31,8 +31,8 @@ from .agent_based_api.v1 import (
 class ScAlert(NamedTuple):
     alertDefinition: str
     message: str
-    acknowledged: bool
-    supportUrl: str
+    acknowledged: bool = False
+    supportUrl: str = None
 
 
 def parse_dell_storage_alert(string_table):
@@ -54,7 +54,7 @@ def check_dell_storage_alert(section):
         yield Result(state=State.OK, summary='No active alerts present')
 
     for alert in section:
-        if bool(alert.acknowledged):
+        if alert.acknowledged == 'True':
             yield Result(state=State.OK, summary=f'Acknowledged {alert.alertDefinition}: {alert.message} {alert.supportUrl}')
         else:
             yield Result(state=State.WARN, summary=f'{alert.alertDefinition}: {alert.message} {alert.supportUrl}')

@@ -69,9 +69,8 @@ def check_dell_storage_controller(item, section):
         yield Result(state=State.OK, summary=f'Model: {ctrl.modelSeries} v{ctrl.version}')
         yield Result(state=State.OK, summary=f'ST: {ctrl.serviceTag}')
         yield Result(state=State.OK, summary=f'SN: {ctrl.serialNumber}')
-        return
 
-    yield Result(state=State.UNKNOWN, summary='Controller %s not found.' % item)
+        return
 
 
 register.check_plugin(

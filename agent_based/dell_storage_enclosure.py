@@ -70,9 +70,8 @@ def check_dell_storage_enclosure(item, section):
 
         yield Result(state=State.OK, summary=f'ST: {enc.serviceTag}')
         yield Result(state=State.OK, summary=f'ESC: {enc.expressServiceCode}')
-        return
 
-    yield Result(state=State.UNKNOWN, summary='Enclosure %s not found.' % item)
+        return
 
 
 register.check_plugin(

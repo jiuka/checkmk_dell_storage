@@ -87,8 +87,6 @@ def check_dell_storage_center(item, section):
 
         return
 
-    yield Result(state=State.UNKNOWN, summary='Storage Center %s not found.' % item)
-
 
 register.check_plugin(
     name='dell_storage_center',

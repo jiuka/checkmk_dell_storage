@@ -82,8 +82,6 @@ def check_dell_storage_temp(item, params, section):
 
         return
 
-    yield Result(state=State.UNKNOWN, summary='Temperature %s not found.' % item)
-
 
 register.check_plugin(
     name='dell_storage_temp',

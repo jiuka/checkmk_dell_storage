@@ -103,7 +103,7 @@ class DellStorageApi:
         return resp.json()
 
     def url(self, call):
-        return '%s%s' % (self._url, call if call[0] != '/' else call[1:])
+        return f'{self._url.rstrip("/")}/{call.strip("/")}'
 
     @cached_property
     def storage_centers(self):

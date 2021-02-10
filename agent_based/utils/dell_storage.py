@@ -36,6 +36,6 @@ def DSStatus(value):
 
 def DSResult(dsobject):
     if dsobject.statusMessage:
-        yield Result(state=DSStatus(dsobject.status), summary=dsobject.status, details=dsobject.statusMessage)
+        yield Result(state=DSStatus(dsobject.status), summary=f'{dsobject.status}: {dsobject.statusMessage}')
     else:
         yield Result(state=DSStatus(dsobject.status), summary=dsobject.status)
