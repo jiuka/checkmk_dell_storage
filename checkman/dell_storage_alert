@@ -1,0 +1,16 @@
+title: Dell Storage: Alerts
+agents: dell_storage
+catalog: os/storage
+license: GPL
+description:
+ This check monitors the alerts reported in the Dell Storage API. Only active
+ alerts are reported.
+
+ The service goes {WARN} if there are any inacknowledged alerts.
+
+item:
+ Is named {StorageCenter Alert}
+
+inventory:
+ One service is created on the StorageCenter host.
+

@@ -1,0 +1,15 @@
+title: Dell Storage: Controller
+agents: dell_storage
+catalog: os/storage
+license: GPL
+description:
+ This check monitors status of the controller reported in the Dell Storage API.
+ The model, service tag and express service code are reported.
+
+item:
+ The name of the controller in the Dell Storage API.
+
+inventory:
+ One service for each controller is created on the StorageCenter host and one
+ on the Controller host.
+

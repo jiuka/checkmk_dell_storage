@@ -1,0 +1,15 @@
+title: Dell Storage: Enclosure
+agents: dell_storage
+catalog: os/storage
+license: GPL
+description:
+ This check monitors status of the enclosure reported in the Dell Storage API.
+ The model, type, capacity, service tag and express service code are reported.
+
+item:
+ The name of the enclosure in the Dell Storage API.
+
+inventory:
+ One service for each enclosure is created on the StorageCenter host and one
+ on the Enclosure host.
+

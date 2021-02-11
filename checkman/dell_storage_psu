@@ -1,0 +1,17 @@
+title: Dell Storage: PowerSUpply
+agents: dell_storage
+catalog: os/storage
+license: GPL
+description:
+ This check monitors the status of the powersuppies in the Dell Storage API.
+
+ The service goes {WARN} if Storage API reports it as {Degraded}.
+
+ The service goes {CRIT} if Storage API reports it as {Down}.
+
+item:
+ The name of the powersupply in the Dell Storage API.
+
+inventory:
+ One service is created for each powersupply.
+

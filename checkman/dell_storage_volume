@@ -1,0 +1,16 @@
+title: Dell Storage: Volume state and performance
+agents: dell_storage
+catalog: os/storage
+license: GPL
+description:
+ This check tests the status of volumes in a Dell Storage system and
+ measures the throughput, operations and latency.
+
+ You can apply separate warning and critical levels for the read
+ and write throughput, operations and latency. 
+
+item:
+ The name of the volume in the Dell Storage API.
+
+inventory:
+ One service is created for each volume on the StorageCenter.

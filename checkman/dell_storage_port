@@ -1,0 +1,16 @@
+title: Dell Storage: Port state and performance
+agents: dell_storage
+catalog: os/storage
+license: GPL
+description:
+ This check tests the status of IO Ports in a Dell Storage system and
+ measures the throughput, operations and latency.
+
+ You can apply separate warning and critical levels for the read
+ and write throughput, operations and latency. 
+
+item:
+ The Name of port in the Dell Storage API.
+
+inventory:
+ One service is created for each port in the StorageController.

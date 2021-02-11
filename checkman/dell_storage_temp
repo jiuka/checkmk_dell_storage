@@ -1,0 +1,21 @@
+title: Dell Storage: Temperature sensor
+agents: dell_storage
+catalog: os/storage
+license: GPL
+description:
+ This check monitors the temperature of sensors reported in the Dell Storage API.
+ The check uses the reported thresholds from the sensor as a fallback if no thresholds
+ are configured in Checkmk.
+
+ The service goes {WARN} if Storage API reports it as {Degraded} or the lower or
+ upper warning threshold is reached.
+
+ The service goes {CRIT} if Storage API reports it as {Down} or the lower or
+ upper critical threshold is reached.
+
+item:
+ The name of the temperature sensor in the Dell Storage API.
+
+inventory:
+ One service is created for each temperature sensor.
+

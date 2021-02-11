@@ -1,0 +1,15 @@
+title: Dell Storage: StorageCenter
+agents: dell_storage
+catalog: os/storage
+license: GPL
+description:
+ This check monitors status of the StorageCenter reported in the Dell Storage API.
+ The model, service tag and serial number are reported. The number of objects in
+ the StorageCenter are exported as metric.
+
+item:
+ The name of the StorageCenter in the Dell Storage API.
+
+inventory:
+ One service is created on the StorageCenter host.
+

@@ -1,0 +1,15 @@
+title: Dell Storage: Special Agent
+agents: dell_storage
+catalog: os/storage
+license: GPL
+description:
+ This check monitors the status of the special agent and records metrics for the time taken and number of requests.
+
+ The service goes {CRIT} if the special agent did not run propperly.
+
+item:
+ Is named {Dell Storage API}
+
+inventory:
+ One service is created on the host running the special agent.
+

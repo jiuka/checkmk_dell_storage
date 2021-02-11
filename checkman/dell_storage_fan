@@ -1,0 +1,22 @@
+title: Dell Storage: Cooling Fan
+agents: dell_storage
+catalog: os/storage
+license: GPL
+description:
+ This check monitors the cooling fans reported in the Dell Storage API.
+ The check uses the reported state of the fan in the Dell Storage API. If the fan
+ also reports its speed it checks the speed against the reported thresholds from
+ the fan as a fallback if no thresholds are configured in Checkmk.
+
+ The service goes {WARN} if Storage API reports it as {Degraded} or the lower or
+ upper warning threshold is reached.
+
+ The service goes {CRIT} if Storage API reports it as {Down} or the lower or
+ upper critical threshold is reached.
+
+item:
+ The name of the cooling fan in the Dell Storage API.
+
+inventory:
+ One service is created for each cooling fan.
+
