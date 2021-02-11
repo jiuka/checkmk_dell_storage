@@ -2,6 +2,7 @@
 
 ![build](https://github.com/jiuka/checkmk_dell_storage/workflows/build/badge.svg)
 ![flake8](https://github.com/jiuka/checkmk_dell_storage/workflows/Lint/badge.svg?branch=master)
+![pytest](https://github.com/jiuka/checkmk_dell_storage/workflows/pytest/badge.svg?branch=master)
 
 ## Description
 
