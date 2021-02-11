@@ -37,8 +37,8 @@ from cmk.gui.plugins.wato.datasource_programs import RulespecGroupDatasourceProg
 
 def _valuespec_special_agents_dell_storage():
     return Dictionary(
-        title = _('Check state of Dell Storage Manager'),
-        help = _('This rule selects the Dell Storage Manager agent instead of '
+        title = _('Dell Storage via Dell Storage API'),
+        help = _('This rule selects the Dell Storage API agent instead of '
                  'the normal Check_MK Agent and allows monitoring of '
                  'Dell Storage Manager systems and volumes by REST. '
                  'You can configure your connection settings here.'
@@ -54,14 +54,14 @@ def _valuespec_special_agents_dell_storage():
             (
                 'user',
                 TextAscii(
-                    title = _('Dell Storage API user name.'),
+                    title = _('Dell Storage API username.'),
                     allow_empty = False,
                 )
             ),
             (
                 'password',
                 IndividualOrStoredPassword(
-                    title = _('Dell Storage API user password'),
+                    title = _('Dell Storage API password'),
                     allow_empty = False,
                 )
             ),
