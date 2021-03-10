@@ -26,7 +26,7 @@ def agent_dell_storage_arguments(params, hostname, ipaddress):
         '-p', passwordstore_get_cmdline('%s', params['password']),
         '-U', params['url'],
     ]
-    if params['ignore_cert'] != '':
+    if 'ignore_cert' in params and params['ignore_cert'] != '':
         args += ['--ignore-cert']
     return args
 
