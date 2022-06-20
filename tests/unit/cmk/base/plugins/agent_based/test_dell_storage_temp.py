@@ -120,7 +120,12 @@ def test_discovery_dell_storage_temp(section, result):
         ]
     ),
 ])
-def test_check_dell_storage_temp(item, section, result):
+def test_check_dell_storage_temp(item, section, result, mocker):
+    mocker.patch(
+        'cmk.base.plugins.agent_based.dell_storage_temp.get_value_store',
+        return_value={}
+    )
+
     assert list(dell_storage_temp.check_dell_storage_temp(item, {}, section)) == result
 
 
@@ -162,5 +167,10 @@ def test_check_dell_storage_temp(item, section, result):
         Result(state=State.OK, summary='Temperature: 295K'),
     ),
 ])
-def test_check_dell_storage_temp_w_param(params, result):
+def test_check_dell_storage_temp_w_param(params, result, mocker):
+    mocker.patch(
+        'cmk.base.plugins.agent_based.dell_storage_temp.get_value_store',
+        return_value={}
+    )
+
     assert result in list(dell_storage_temp.check_dell_storage_temp(SAMPLE_SECTION[0].name, params, [SAMPLE_SECTION[0]]))

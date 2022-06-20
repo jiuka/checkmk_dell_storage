@@ -123,7 +123,12 @@ def test_discovery_dell_storage_port(section, result):
         ]
     ),
 ])
-def test_check_dell_storage_port(item, section, result):
+def test_check_dell_storage_port(item, section, result, mocker):
+    mocker.patch(
+        'cmk.base.plugins.agent_based.dell_storage_port.get_value_store',
+        return_value={}
+    )
+
     assert list(dell_storage_port.check_dell_storage_port(item, {}, section)) == result
 
 
@@ -201,5 +206,10 @@ def test_check_dell_storage_port(item, section, result):
         Result(state=State.CRIT, notice='Write latency: 459 microseconds (warn/crit at 50 microseconds/60 microseconds)'),
     ),
 ])
-def test_check_dell_storage_port_w_param(params, result):
+def test_check_dell_storage_port_w_param(params, result, mocker):
+    mocker.patch(
+        'cmk.base.plugins.agent_based.dell_storage_port.get_value_store',
+        return_value={}
+    )
+
     assert result in list(dell_storage_port.check_dell_storage_port(SAMPLE_SECTION[1].name, params, [SAMPLE_SECTION[1]]))

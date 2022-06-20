@@ -200,7 +200,12 @@ def test_discovery_dell_storage_disk(section, result):
         ]
     ),
 ])
-def test_check_dell_storage_disk(item, section, result):
+def test_check_dell_storage_disk(item, section, result, mocker):
+    mocker.patch(
+        'cmk.base.plugins.agent_based.dell_storage_disk.get_value_store',
+        return_value={}
+    )
+
     assert list(dell_storage_disk.check_dell_storage_disk(item, {}, section)) == result
 
 
@@ -293,5 +298,10 @@ SAMPLE_DISK = dell_storage_disk.ScDisk(
         Result(state=State.CRIT, notice='Write latency: 2 milliseconds (warn/crit at 0 seconds/1 millisecond)'),
     ),
 ])
-def test_check_dell_storage_disk_w_param(params, result):
+def test_check_dell_storage_disk_w_param(params, result, mocker):
+    mocker.patch(
+        'cmk.base.plugins.agent_based.dell_storage_disk.get_value_store',
+        return_value={}
+    )
+
     assert result in list(dell_storage_disk.check_dell_storage_disk(SAMPLE_DISK.name, params, [SAMPLE_DISK]))
