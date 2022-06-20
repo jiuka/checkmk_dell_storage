@@ -21,6 +21,7 @@
 
 from typing import NamedTuple, Optional
 from .agent_based_api.v1 import (
+    get_value_store,
     register,
     Result,
     Service,
@@ -76,6 +77,7 @@ def check_dell_storage_temp(item, params, section):
             reading=int(temp.currentTemp),
             params=params,
             unique_name="dell_storage_temp.%s" % item,
+            value_store=get_value_store(),
             dev_levels= (int(temp.upperNormalThreshold), int(temp.upperWarningThreshold)),
             dev_levels_lower = (int(temp.lowerNormalThreshold), int(temp.lowerWarningThreshold)),
         )
