@@ -82,6 +82,7 @@ Enclosure - 2;Up;;EN-SC420;1.09;SasEbod12g;24;JKSRF82;123-456-789-01
 <<<dell_storage_volume:sep(59)>>>
 SAN-LUN1;Up;;420166500352;2748779069440;0;0;0.0;2;1024;5.5e-05
 SAN-LUN2;Up;;3673669238784;6597069766656;17;624640;0.00358;128;2139136;0.000768
+SAN-LUN3;Up;;3673669238784;6597069766656;;;;;;
 <<<dell_storage_alert:sep(59)>>>
 VisualIdentifierAlert;Enclosure component 01-01 in Enclosure - 1 has turned on a visual indicator.;True;http://kbredir.compellent.com/troubletree_url/default.html?EventID=012011027&Model=5000&OSVersion=07.03.20
 <<<<>>>>
@@ -101,7 +102,7 @@ Midplane One;Up;;None;21;-128;-7;3;48;53;127
 Bottom Controller;Up;;1970-01-01T01:00:00+01:00;False;Sc5020;7.3.20.19;ABCD123;123-456-789-00;123457
 <<<dell_storage_port:sep(59)>>>
 5555555555555526;Up;;True;Sas;5555555555555526;619;26691584;0.000336;1360;126127104;0.000118
-555555555555552C;Up;;True;Iscsi;555555555555552C;210;8645632;0.001676;333;14295040;0.002401
+555555555555552C;Up;;True;Iscsi;555555555555552C;;;;;;
 <<<dell_storage_temp:sep(59)>>>
 BBU;Up;;None;25;-128;-7;10;55;65;127
 CPU One;Up;;None;46;-128;3;8;92;97;127
@@ -120,7 +121,7 @@ BBU;Up;;None;27;-128;-7;10;55;65;127
 Enclosure - 1;Up;;EN-SC5020;1.05;SasEbod12g;30;ABCD123;123-456-789-00
 <<<dell_storage_disk:sep(59)>>>
 01-16;Up;;360081014784;1800360124416;2;74752;0.003753;0;0;0.0
-01-08;Up;;1661088579584;1800360124416;3;131072;0.004208;0;2048;0.0
+01-08;Up;;1661088579584;1800360124416;;;;;;
 <<<<SAN-Enclosure-2>>>>
 <<<dell_storage_enclosure:sep(59)>>>
 Enclosure - 2;Up;;EN-SC420;1.09;SasEbod12g;24;JKSRF82;123-456-789-01
@@ -134,8 +135,8 @@ Enclosure - 2;Up;;EN-SC420;1.09;SasEbod12g;24;JKSRF82;123-456-789-01
 02-01;Up;;Back Left
 02-02;Up;;Back Right
 <<<dell_storage_temp:sep(59)>>>
-02-01;Up;;Ambient;19;None;0;5;45;48;None
-02-02;Up;;Midplane;26;None;4;9;54;57;None
+02-01;Up;;Ambient;19;;0;5;45;48;
+02-02;Up;;Midplane;26;;4;9;54;57;
 <<<<>>>>
 <<<dell_storage_agent:sep(59)>>>
 '''.splitlines()

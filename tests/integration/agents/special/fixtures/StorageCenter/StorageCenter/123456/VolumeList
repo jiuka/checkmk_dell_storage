@@ -80,5 +80,46 @@
         "objectType": "ScVolume",
         "instanceId": "123456.12",
         "instanceName": "SAN-LUN2"
+    },
+    {
+        "lastReductionTime": "1970-01-01T01:00:00+01:00",
+        "name": "SAN-LUN3",
+        "storageType": {
+            "instanceId": "123456.1",
+            "instanceName": "Assigned - Redundant - 2 MB",
+            "objectType": "ScStorageType"
+        },
+        "serialNumber": "00000000-00000002",
+        "active": true,
+        "hostCacheEnabled": false,
+        "replicationDestination": false,
+        "volumeFolderPath": "/",
+        "replicationSource": false,
+        "portableVolumeDestination": false,
+        "configuredSize": "6597069766656 Bytes",
+        "mapped": true,
+        "deleteAllowed": true,
+        "inRecycleBin": false,
+        "deviceId": "00000000000000000000000000000001",
+        "flashOptimized": false,
+        "cmmSource": false,
+        "cmmDestination": false,
+        "liveVolume": false,
+        "migration": false,
+        "secureDataUsed": false,
+        "vpdId": 14,
+        "replayAllowed": true,
+        "volumeFolder": {
+            "instanceId": "123456.0",
+            "instanceName": "Volumes",
+            "objectType": "ScVolumeFolder"
+        },
+        "status": "Up",
+        "statusMessage": "",
+        "scSerialNumber": 123456,
+        "scName": "SAN",
+        "objectType": "ScVolume",
+        "instanceId": "123456.13",
+        "instanceName": "SAN-LUN3"
     }
 ]

@@ -76,19 +76,22 @@ def check_dell_storage_port(item, params, section):
         yield Result(state=State.OK, summary=f'WWN: {port.wwn}')
 
         value_store = get_value_store()
-        yield from diskstat.check_diskstat_dict(
-            params=params,
-            disk={
-                'read_ios': int(port.readIops),
-                'read_throughput': int(port.readBps),
-                'read_latency': float(port.readLatency),
-                'write_ios': int(port.writeIops),
-                'write_throughput': int(port.writeBps),
-                'write_latency': float(port.writeLatency),
-            },
-            value_store=value_store,
-            this_time=time.time(),
-        )
+        try:
+            yield from diskstat.check_diskstat_dict(
+                params=params,
+                disk={
+                    'read_ios': int(port.readIops),
+                    'read_throughput': int(port.readBps),
+                    'read_latency': float(port.readLatency),
+                    'write_ios': int(port.writeIops),
+                    'write_throughput': int(port.writeBps),
+                    'write_latency': float(port.writeLatency),
+                },
+                value_store=value_store,
+                this_time=time.time(),
+            )
+        except ValueError:
+            pass
 
         return
 

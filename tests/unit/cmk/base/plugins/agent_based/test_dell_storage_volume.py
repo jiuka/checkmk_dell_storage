@@ -31,6 +31,7 @@ from cmk.base.plugins.agent_based import dell_storage_volume
 SAMPLE_STRING_TABLE = [
     ['SAN-LUN01', 'Up', '', '420166500352', '2748779069440', '0', '0', '0.0', '1', '1024', '5.6e-05'],
     ['SAN-LUN02(6)', 'Up', '', '3607283892224', '6597069766656', '14', '292864', '0.002162', '117', '1913856', '0.000857'],
+    ['SAN-LUN03', 'Up', '', '3607283892224', '6597069766656', '', '', '', '', '', ''],
 ]
 
 SAMPLE_SECTION = [
@@ -60,6 +61,19 @@ SAMPLE_SECTION = [
         writeBps='1913856',
         writeLatency='0.000857',
     ),
+    dell_storage_volume.ScVolume(
+        name='SAN-LUN03',
+        status='Up',
+        statusMessage='',
+        activeSpace='3607283892224',
+        configuredSpace='6597069766656',
+        readIops='',
+        readBps='',
+        readLatency='',
+        writeIops='',
+        writeBps='',
+        writeLatency='',
+    ),
 ]
 
 
@@ -88,6 +102,7 @@ def test_parse_dell_storage_volume(string_table, result):
         [
             Service(item=SAMPLE_SECTION[0].name),
             Service(item=SAMPLE_SECTION[1].name),
+            Service(item=SAMPLE_SECTION[2].name),
         ]
     ),
 ])
@@ -116,6 +131,14 @@ def test_discovery_dell_storage_volume(section, result):
             Metric('disk_read_latency', 0.002162),
             Result(state=State.OK, notice='Write latency: 857 microseconds'),
             Metric('disk_write_latency', 0.000857),
+        ]
+    ),
+    (
+        SAMPLE_SECTION[2].name,
+        SAMPLE_SECTION,
+        [
+            Result(state=State.OK, summary='Up'),
+            Metric('usage', 3607283892224, boundaries=(0, 6597069766656)),
         ]
     ),
 ])

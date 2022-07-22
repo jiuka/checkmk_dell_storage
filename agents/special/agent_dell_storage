@@ -143,10 +143,14 @@ class DellStorageApi:
         def __repr__(self):
             return f'<{self.__class__.__name__} {self.instanceName} {self.instanceId}>'
 
-        def _get_association(self, url, payload=None):
-            if payload:
-                return self._instanciate(self._api.post(url, payload=payload)[0])
+        def _get_association(self, url):
             return self._instanciate(self._api.get(url))
+
+        def _get_historical_association(self, url):
+            assoc = self._api.post(url, payload=DellStorageApi.HISTORICAL_FILTER)
+            if len(assoc) > 0:
+                return self._instanciate(assoc[0])
+            return None
 
         def _get_associations(self, url):
             return [self._instanciate(obj) for obj in self._api.get(url)]
@@ -162,7 +166,7 @@ class DellStorageApi:
             return self.AGENT_DEFAULT_FIELDS + self.AGENT_FIELDS
 
         def to_agent(self, separator=';'):
-            return separator.join([str(getattr(self, field, None)) for field in self._fields()])
+            return separator.join([str(getattr(self, field, '')) for field in self._fields()])
 
     class StorageCenter(ApiObject):
         AGENT_FIELDS = [
@@ -290,8 +294,7 @@ class DellStorageApi:
 
         @cached_property
         def iousage(self):
-            return self._get_association(f'/StorageCenter/ScControllerPort/{self.instanceId}/GetHistoricalIoUsage',
-                                         payload=DellStorageApi.HISTORICAL_FILTER)
+            return self._get_historical_association(f'/StorageCenter/ScControllerPort/{self.instanceId}/GetHistoricalIoUsage')
 
     class ScControllerPortIoUsage(ApiObject):
         readIops: int
@@ -412,8 +415,7 @@ class DellStorageApi:
 
         @cached_property
         def iousage(self):
-            return self._get_association(f'/StorageCenter/ScDisk/{self.instanceId}/GetHistoricalIoUsage',
-                                         payload=DellStorageApi.HISTORICAL_FILTER)
+            return self._get_historical_association(f'/StorageCenter/ScDisk/{self.instanceId}/GetHistoricalIoUsage')
 
     class ScDiskIoUsage(ScControllerPortIoUsage):
         pass
@@ -452,8 +454,7 @@ class DellStorageApi:
 
         @cached_property
         def iousage(self):
-            return self._get_association(f'/StorageCenter/ScVolume/{self.instanceId}/GetHistoricalIoUsage',
-                                         payload=DellStorageApi.HISTORICAL_FILTER)
+            return self._get_historical_association(f'/StorageCenter/ScVolume/{self.instanceId}/GetHistoricalIoUsage')
 
     class ScVolumeIoUsage(ScControllerPortIoUsage):
         pass

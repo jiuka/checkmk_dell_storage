@@ -31,6 +31,7 @@ from cmk.base.plugins.agent_based import dell_storage_port
 SAMPLE_STRING_TABLE = [
     ['5000D310055E9018', 'Up', '', 'True', 'Iscsi', '5000D310055E9018', '18', '945152', '0.002458', '147', '2330624', '0.000434'],
     ['5000D310055E9016', 'Up', '', 'True', 'Iscsi', '5000D310055E9016', '16', '899072', '0.002574', '159', '2462720', '0.000459'],
+    ['5000D310055E9014', 'Up', '', 'True', 'Iscsi', '5000D310055E9014', '', '', '', '', '', ''],
 ]
 
 SAMPLE_SECTION = [
@@ -62,6 +63,20 @@ SAMPLE_SECTION = [
         writeBps='2462720',
         writeLatency='0.000459',
     ),
+    dell_storage_port.ScPort(
+        name='5000D310055E9014',
+        status='Up',
+        statusMessage='',
+        cabled='True',
+        type='Iscsi',
+        wwn='5000D310055E9014',
+        readIops='',
+        readBps='',
+        readLatency='',
+        writeIops='',
+        writeBps='',
+        writeLatency='',
+    ),
 ]
 
 
@@ -90,6 +105,7 @@ def test_parse_dell_storage_port(string_table, result):
         [
             Service(item=SAMPLE_SECTION[0].name),
             Service(item=SAMPLE_SECTION[1].name),
+            Service(item=SAMPLE_SECTION[2].name),
         ]
     ),
 ])
@@ -120,6 +136,16 @@ def test_discovery_dell_storage_port(section, result):
             Metric('disk_read_latency', 0.002458),
             Result(state=State.OK, notice='Write latency: 434 microseconds'),
             Metric('disk_write_latency', 0.000434),
+        ]
+    ),
+    (
+        SAMPLE_SECTION[2].name,
+        SAMPLE_SECTION,
+        [
+            Result(state=State.OK, summary='Up'),
+            Result(state=State.OK, summary='Cabled: True'),
+            Result(state=State.OK, summary='Type: Iscsi'),
+            Result(state=State.OK, summary='WWN: 5000D310055E9014'),
         ]
     ),
 ])

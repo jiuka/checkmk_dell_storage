@@ -80,6 +80,22 @@ from cmk.base.plugins.agent_based import dell_storage_disk
             )
         ]
     ),
+    (
+        [['01-16', 'Up', '', '360081014784', '1800360124416', '', '', '', '', '', '']],
+        [dell_storage_disk.ScDisk(
+            name='01-16',
+            status='Up',
+            statusMessage='',
+            allocatedSpace='360081014784',
+            totalSpace='1800360124416',
+            readIops='',
+            readBps='',
+            readLatency='',
+            writeIops='',
+            writeBps='',
+            writeLatency='',
+        )]
+    ),
 ])
 def test_parse_dell_storage_disk(string_table, result):
     assert list(dell_storage_disk.parse_dell_storage_disk(string_table)) == result
@@ -197,6 +213,28 @@ def test_discovery_dell_storage_disk(section, result):
             Metric('disk_read_latency', 0.003444),
             Result(state=State.OK, notice='Write latency: 0 seconds'),
             Metric('disk_write_latency', 0.0),
+        ]
+    ),
+    (
+        '01-16',
+        [
+            dell_storage_disk.ScDisk(
+                name='01-16',
+                status='Up',
+                statusMessage='',
+                allocatedSpace='360081014784',
+                totalSpace='1800360124416',
+                readIops='',
+                readBps='',
+                readLatency='',
+                writeIops='',
+                writeBps='',
+                writeLatency='',
+            ),
+        ],
+        [
+            Result(state=State.OK, summary='Up'),
+            Metric('usage', 360081014784, boundaries=(0, 1800360124416)),
         ]
     ),
 ])

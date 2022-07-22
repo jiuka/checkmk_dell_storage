@@ -74,19 +74,22 @@ def check_dell_storage_disk(item, params, section):
                      boundaries=(0, int(disk.totalSpace)))
 
         value_store = get_value_store()
-        yield from diskstat.check_diskstat_dict(
-            params=params,
-            disk={
-                'read_ios': int(disk.readIops),
-                'read_throughput': int(disk.readBps),
-                'read_latency': float(disk.readLatency),
-                'write_ios': int(disk.writeIops),
-                'write_throughput': int(disk.writeBps),
-                'write_latency': float(disk.writeLatency),
-            },
-            value_store=value_store,
-            this_time=time.time(),
-        )
+        try:
+            yield from diskstat.check_diskstat_dict(
+                params=params,
+                disk={
+                    'read_ios': int(disk.readIops),
+                    'read_throughput': int(disk.readBps),
+                    'read_latency': float(disk.readLatency),
+                    'write_ios': int(disk.writeIops),
+                    'write_throughput': int(disk.writeBps),
+                    'write_latency': float(disk.writeLatency),
+                },
+                value_store=value_store,
+                this_time=time.time(),
+            )
+        except ValueError:
+            pass
 
         return
 
