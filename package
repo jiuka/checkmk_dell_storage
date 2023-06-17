@@ -43,8 +43,8 @@
     },
     'name': 'dell_storage',
     'title': u'Checkmk Dell Storage API Special-Agent',
-    'version': '0.6',
+    'version': '0.6.1',
     'version.min_required': '2.1.0',
-    'version.packaged': '2.1.0',
-    'version.usable_until': '2.2.0'
+    'version.packaged': '2.2.0',
+    'version.usable_until': '2.3.0'
 }

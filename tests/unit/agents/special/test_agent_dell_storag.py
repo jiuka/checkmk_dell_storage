@@ -33,8 +33,8 @@ spec.loader.exec_module(agent_dell_storage)
 class TestDellStorageApiParser:
     @pytest.mark.parametrize('value, result', [
         ('', None),
-        ('0°C / 3°F', 0),
-        ('100°C / 212°F', 100),
+        ('0 °C / 3 °F', 0),
+        ('100 °C / 212 °F', 100),
     ])
     def test_DellStorageApiParser_temperature(self, value, result):
         assert agent_dell_storage.DellStorageApiParser.temperature(value) == result
