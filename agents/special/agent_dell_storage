@@ -501,14 +501,8 @@ class AgentDellStorage:
 
         start = time.time()
 
-        print('<<<check_mk>>>')
-
         try:
             self._api = DellStorageApi(args.url, args.user, args.password, args.verify_cert)
-
-            print(f'Version: {self._api.providerVersion}')
-            print(f'AgentOS: {self._api.provider}')
-
             for storageCenter in self._api.storage_centers:
                 self.piggyback(storageCenter.instanceName)
                 self.section('center', [storageCenter])
