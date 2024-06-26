@@ -3,7 +3,7 @@
 #
 # checkmk_dell_storage - Checkmk extension for Dell Storage API
 #
-# Copyright (C) 2021  Marius Rieder <marius.rieder@scs.ch>
+# Copyright (C) 2021-2024  Marius Rieder <marius.rieder@durchmesser.ch>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -20,13 +20,18 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 import pytest  # type: ignore[import]
-from cmk.base.plugins.agent_based.agent_based_api.v1 import (
+from cmk.agent_based.v2 import (
     Metric,
     Result,
     Service,
     State,
 )
-from cmk.base.plugins.agent_based import dell_storage_temp
+from cmk_addons.plugins.dell_storage.agent_based import dell_storage_temp
+
+
+def get_value_store():
+    return {}
+
 
 SAMPLE_STRING_TABLE = [
     ['Ambient', 'Up', '', 'None', '22', '-128', '-7', '3', '42', '47', '127'],
@@ -120,11 +125,8 @@ def test_discovery_dell_storage_temp(section, result):
         ]
     ),
 ])
-def test_check_dell_storage_temp(item, section, result, mocker):
-    mocker.patch(
-        'cmk.base.plugins.agent_based.dell_storage_temp.get_value_store',
-        return_value={}
-    )
+def test_check_dell_storage_temp(item, section, result, monkeypatch):
+    monkeypatch.setattr(dell_storage_temp, 'get_value_store', get_value_store)
 
     assert list(dell_storage_temp.check_dell_storage_temp(item, {}, section)) == result
 
@@ -167,10 +169,7 @@ def test_check_dell_storage_temp(item, section, result, mocker):
         Result(state=State.OK, summary='Temperature: 295 K'),
     ),
 ])
-def test_check_dell_storage_temp_w_param(params, result, mocker):
-    mocker.patch(
-        'cmk.base.plugins.agent_based.dell_storage_temp.get_value_store',
-        return_value={}
-    )
+def test_check_dell_storage_temp_w_param(params, result, monkeypatch):
+    monkeypatch.setattr(dell_storage_temp, 'get_value_store', get_value_store)
 
     assert result in list(dell_storage_temp.check_dell_storage_temp(SAMPLE_SECTION[0].name, params, [SAMPLE_SECTION[0]]))

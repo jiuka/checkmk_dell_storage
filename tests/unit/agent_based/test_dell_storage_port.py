@@ -3,7 +3,7 @@
 #
 # checkmk_dell_storage - Checkmk extension for Dell Storage API
 #
-# Copyright (C) 2021  Marius Rieder <marius.rieder@scs.ch>
+# Copyright (C) 2021-2024  Marius Rieder <marius.rieder@durchmesser.ch>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -20,13 +20,13 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 import pytest  # type: ignore[import]
-from cmk.base.plugins.agent_based.agent_based_api.v1 import (
+from cmk.agent_based.v2 import (
     Metric,
     Result,
     Service,
     State,
 )
-from cmk.base.plugins.agent_based import dell_storage_port
+from cmk_addons.plugins.dell_storage.agent_based import dell_storage_port
 
 SAMPLE_STRING_TABLE = [
     ['5000D310055E9018', 'Up', '', 'True', 'Iscsi', '5000D310055E9018', '18', '945152', '0.002458', '147', '2330624', '0.000434'],
@@ -149,38 +149,35 @@ def test_discovery_dell_storage_port(section, result):
         ]
     ),
 ])
-def test_check_dell_storage_port(item, section, result, mocker):
-    mocker.patch(
-        'cmk.base.plugins.agent_based.dell_storage_port.get_value_store',
-        return_value={}
-    )
+def test_check_dell_storage_port(item, section, result, monkeypatch):
+    monkeypatch.setattr(dell_storage_port, 'get_value_store', lambda: {})
 
     assert list(dell_storage_port.check_dell_storage_port(item, {}, section)) == result
 
 
 @pytest.mark.parametrize('params, result', [
     (
-        {'read': (1, 2)},
+        {'read_throughput': (1_000_000, 2_000_000)},
         Result(state=State.OK, summary='Read: 899 kB/s'),
     ),
     (
-        {'read': (0.5, 2)},
+        {'read_throughput': (500_000, 2_000_000)},
         Result(state=State.WARN, summary='Read: 899 kB/s (warn/crit at 500 kB/s/2.00 MB/s)')
     ),
     (
-        {'read': (0.5, 0.8)},
+        {'read_throughput': (500_000, 800_000)},
         Result(state=State.CRIT, summary='Read: 899 kB/s (warn/crit at 500 kB/s/800 kB/s)')
     ),
     (
-        {'write': (3, 4)},
+        {'write_throughput': (3_000_000, 4_000_000)},
         Result(state=State.OK, summary='Write: 2.46 MB/s')
     ),
     (
-        {'write': (1, 4)},
+        {'write_throughput': (1_000_000, 4_000_000)},
         Result(state=State.WARN, summary='Write: 2.46 MB/s (warn/crit at 1.00 MB/s/4.00 MB/s)')
     ),
     (
-        {'write': (1, 2)},
+        {'write_throughput': (1_000_000, 2_000_000)},
         Result(state=State.CRIT, summary='Write: 2.46 MB/s (warn/crit at 1.00 MB/s/2.00 MB/s)')
     ),
     (
@@ -208,34 +205,34 @@ def test_check_dell_storage_port(item, section, result, mocker):
         Result(state=State.CRIT, notice='Write operations: 159.00/s (warn/crit at 50.00/s/100.00/s)'),
     ),
     (
-        {'read_latency': (4, 5)},
+        {'read_latency': (0.004, 0.005)},
         Result(state=State.OK, notice='Read latency: 3 milliseconds'),
     ),
     (
-        {'read_latency': (1, 5)},
+        {'read_latency': (0.001, 0.005)},
         Result(state=State.WARN, notice='Read latency: 3 milliseconds (warn/crit at 1 millisecond/5 milliseconds)'),
     ),
     (
-        {'read_latency': (1, 2)},
+        {'read_latency': (0.001, 0.002)},
         Result(state=State.CRIT, notice='Read latency: 3 milliseconds (warn/crit at 1 millisecond/2 milliseconds)'),
     ),
     (
-        {'write_latency': (2, 3)},
+        {'write_latency': (0.002, 0.003)},
         Result(state=State.OK, notice='Write latency: 459 microseconds'),
     ),
     (
-        {'write_latency': (0.05, 3)},
+        {'write_latency': (0.00005, 0.003)},
         Result(state=State.WARN, notice='Write latency: 459 microseconds (warn/crit at 50 microseconds/3 milliseconds)'),
     ),
     (
-        {'write_latency': (0.05, 0.06)},
+        {'write_latency': (0.00005, 0.00006)},
         Result(state=State.CRIT, notice='Write latency: 459 microseconds (warn/crit at 50 microseconds/60 microseconds)'),
     ),
 ])
-def test_check_dell_storage_port_w_param(params, result, mocker):
-    mocker.patch(
-        'cmk.base.plugins.agent_based.dell_storage_port.get_value_store',
-        return_value={}
-    )
+def test_check_dell_storage_port_w_param(params, result, monkeypatch):
+    monkeypatch.setattr(dell_storage_port, 'get_value_store', lambda: {})
+
+    for i in dell_storage_port.check_dell_storage_port(SAMPLE_SECTION[1].name, params, [SAMPLE_SECTION[1]]):
+        print(i)
 
     assert result in list(dell_storage_port.check_dell_storage_port(SAMPLE_SECTION[1].name, params, [SAMPLE_SECTION[1]]))

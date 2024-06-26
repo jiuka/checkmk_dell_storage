@@ -3,7 +3,7 @@
 #
 # checkmk_dell_storage - Checkmk extension for Dell Storage API
 #
-# Copyright (C) 2021  Marius Rieder <marius.rieder@scs.ch>
+# Copyright (C) 2021-2024  Marius Rieder <marius.rieder@durchmesser.ch>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -20,13 +20,13 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 import pytest  # type: ignore[import]
-from cmk.base.plugins.agent_based.agent_based_api.v1 import (
+from cmk.agent_based.v2 import (
     Metric,
     Result,
     Service,
     State,
 )
-from cmk.base.plugins.agent_based import dell_storage_fan
+from cmk_addons.plugins.dell_storage.agent_based import dell_storage_fan
 
 SAMPLE_STRING_TABLE = [
     ['Fan 1', 'Up', '', 'Fan 1 Single rotor, Power Supply 1', '5880', '0', '1800', '2040', '18000', '20000', '30600'],
@@ -116,27 +116,27 @@ def test_check_dell_storage_fan(item, section, result):
 
 @pytest.mark.parametrize('params, result', [
     (
-        {'lower': (2400, 1800)},
+        {'lower': ('fixed', (2400, 1800))},
         Result(state=State.OK, summary='Fan Speed: 5880.00'),
     ),
     (
-        {'lower': (7000, 1800)},
+        {'lower': ('fixed', (7000, 1800))},
         Result(state=State.WARN, summary='Fan Speed: 5880.00 (warn/crit below 7000.00/1800.00)'),
     ),
     (
-        {'lower': (7000, 6000)},
+        {'lower': ('fixed', (7000, 6000))},
         Result(state=State.CRIT, summary='Fan Speed: 5880.00 (warn/crit below 7000.00/6000.00)'),
     ),
     (
-        {'upper': (6000, 7000)},
+        {'upper': ('fixed', (6000, 7000))},
         Result(state=State.OK, summary='Fan Speed: 5880.00'),
     ),
     (
-        {'upper': (4000, 7000)},
+        {'upper': ('fixed', (4000, 7000))},
         Result(state=State.WARN, summary='Fan Speed: 5880.00 (warn/crit at 4000.00/7000.00)'),
     ),
     (
-        {'upper': (4000, 5000)},
+        {'upper': ('fixed', (4000, 5000))},
         Result(state=State.CRIT, summary='Fan Speed: 5880.00 (warn/crit at 4000.00/5000.00)'),
     ),
 ])

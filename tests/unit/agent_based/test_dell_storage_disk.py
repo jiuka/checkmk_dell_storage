@@ -3,7 +3,7 @@
 #
 # checkmk_dell_storage - Checkmk extension for Dell Storage API
 #
-# Copyright (C) 2021  Marius Rieder <marius.rieder@scs.ch>
+# Copyright (C) 2021-2024  Marius Rieder <marius.rieder@durchmesser.ch>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -20,13 +20,13 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 import pytest  # type: ignore[import]
-from cmk.base.plugins.agent_based.agent_based_api.v1 import (
+from cmk.agent_based.v2 import (
     Metric,
     Result,
     Service,
     State,
 )
-from cmk.base.plugins.agent_based import dell_storage_disk
+from cmk_addons.plugins.dell_storage.agent_based import dell_storage_disk
 
 
 @pytest.mark.parametrize('string_table, result', [
@@ -238,11 +238,8 @@ def test_discovery_dell_storage_disk(section, result):
         ]
     ),
 ])
-def test_check_dell_storage_disk(item, section, result, mocker):
-    mocker.patch(
-        'cmk.base.plugins.agent_based.dell_storage_disk.get_value_store',
-        return_value={}
-    )
+def test_check_dell_storage_disk(item, section, result, monkeypatch):
+    monkeypatch.setattr(dell_storage_disk, 'get_value_store', lambda: {})
 
     assert list(dell_storage_disk.check_dell_storage_disk(item, {}, section)) == result
 
@@ -264,27 +261,27 @@ SAMPLE_DISK = dell_storage_disk.ScDisk(
 
 @pytest.mark.parametrize('params, result', [
     (
-        {'read': (0.1, 1)},
+        {'read_throughput': (100_000, 1_000_000)},
         Result(state=State.OK, summary='Read: 49.2 kB/s')
     ),
     (
-        {'read': (0.04, 1)},
+        {'read_throughput': (40_000, 1_000_000)},
         Result(state=State.WARN, summary='Read: 49.2 kB/s (warn/crit at 40.0 kB/s/1.00 MB/s)')
     ),
     (
-        {'read': (0.03, 0.04)},
+        {'read_throughput': (30_000, 40_000)},
         Result(state=State.CRIT, summary='Read: 49.2 kB/s (warn/crit at 30.0 kB/s/40.0 kB/s)')
     ),
     (
-        {'write': (0.5, 1)},
+        {'write_throughput': (500_000, 1_000_000)},
         Result(state=State.OK, summary='Write: 14.3 kB/s')
     ),
     (
-        {'write': (0.01, 1)},
+        {'write_throughput': (10_000, 1_000_000)},
         Result(state=State.WARN, summary='Write: 14.3 kB/s (warn/crit at 10.0 kB/s/1.00 MB/s)')
     ),
     (
-        {'write': (0.008, 0.01)},
+        {'write_throughput': (8_000, 10_000)},
         Result(state=State.CRIT, summary='Write: 14.3 kB/s (warn/crit at 8.00 kB/s/10.0 kB/s)')
     ),
     (
@@ -312,34 +309,31 @@ SAMPLE_DISK = dell_storage_disk.ScDisk(
         Result(state=State.CRIT, notice='Write operations: 2.00/s (warn/crit at 1.00/s/2.00/s)'),
     ),
     (
-        {'read_latency': (4, 5)},
+        {'read_latency': (0.004, 0.005)},
         Result(state=State.OK, notice='Read latency: 3 milliseconds'),
     ),
     (
-        {'read_latency': (1, 5)},
+        {'read_latency': (0.001, 0.005)},
         Result(state=State.WARN, notice='Read latency: 3 milliseconds (warn/crit at 1 millisecond/5 milliseconds)'),
     ),
     (
-        {'read_latency': (1, 2)},
+        {'read_latency': (0.001, 0.002)},
         Result(state=State.CRIT, notice='Read latency: 3 milliseconds (warn/crit at 1 millisecond/2 milliseconds)'),
     ),
     (
-        {'write_latency': (4, 5)},
+        {'write_latency': (0.004, 0.005)},
         Result(state=State.OK, notice='Write latency: 2 milliseconds'),
     ),
     (
-        {'write_latency': (1, 5)},
+        {'write_latency': (0.001, 0.005)},
         Result(state=State.WARN, notice='Write latency: 2 milliseconds (warn/crit at 1 millisecond/5 milliseconds)'),
     ),
     (
-        {'write_latency': (0, 1)},
+        {'write_latency': (0.000, 0.001)},
         Result(state=State.CRIT, notice='Write latency: 2 milliseconds (warn/crit at 0 seconds/1 millisecond)'),
     ),
 ])
-def test_check_dell_storage_disk_w_param(params, result, mocker):
-    mocker.patch(
-        'cmk.base.plugins.agent_based.dell_storage_disk.get_value_store',
-        return_value={}
-    )
+def test_check_dell_storage_disk_w_param(params, result, monkeypatch):
+    monkeypatch.setattr(dell_storage_disk, 'get_value_store', lambda: {})
 
     assert result in list(dell_storage_disk.check_dell_storage_disk(SAMPLE_DISK.name, params, [SAMPLE_DISK]))

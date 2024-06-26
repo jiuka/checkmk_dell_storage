@@ -3,7 +3,7 @@
 #
 # checkmk_dell_storage - Checkmk extension for Dell Storage API
 #
-# Copyright (C) 2021  Marius Rieder <marius.rieder@scs.ch>
+# Copyright (C) 2021-2024  Marius Rieder <marius.rieder@durchmesser.ch>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -20,13 +20,18 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 import pytest  # type: ignore[import]
-from cmk.base.plugins.agent_based.agent_based_api.v1 import (
+from cmk.agent_based.v2 import (
     Metric,
     Result,
     Service,
     State,
 )
-from cmk.base.plugins.agent_based import dell_storage_volume
+from cmk_addons.plugins.dell_storage.agent_based import dell_storage_volume
+
+
+def get_value_store():
+    return {}
+
 
 SAMPLE_STRING_TABLE = [
     ['SAN-LUN01', 'Up', '', '420166500352', '2748779069440', '0', '0', '0.0', '1', '1024', '5.6e-05'],
@@ -142,38 +147,35 @@ def test_discovery_dell_storage_volume(section, result):
         ]
     ),
 ])
-def test_check_dell_storage_volume(item, section, result, mocker):
-    mocker.patch(
-        'cmk.base.plugins.agent_based.dell_storage_volume.get_value_store',
-        return_value={}
-    )
+def test_check_dell_storage_volume(item, section, result, monkeypatch):
+    monkeypatch.setattr(dell_storage_volume, 'get_value_store', get_value_store)
 
     assert list(dell_storage_volume.check_dell_storage_volume(item, {}, section)) == result
 
 
 @pytest.mark.parametrize('params, result', [
     (
-        {'read': (1, 2)},
+        {'read_throughput': (1_000_000, 2_000_000)},
         Result(state=State.OK, summary='Read: 293 kB/s')
     ),
     (
-        {'read': (0.1, 2)},
+        {'read_throughput': (100_000, 2_000_000)},
         Result(state=State.WARN, summary='Read: 293 kB/s (warn/crit at 100 kB/s/2.00 MB/s)')
     ),
     (
-        {'read': (0.1, 0.2)},
+        {'read_throughput': (100_000, 200_000)},
         Result(state=State.CRIT, summary='Read: 293 kB/s (warn/crit at 100 kB/s/200 kB/s)')
     ),
     (
-        {'write': (2, 3)},
+        {'write_throughput': (2_000_000, 3_000_000)},
         Result(state=State.OK, summary='Write: 1.91 MB/s')
     ),
     (
-        {'write': (1, 3)},
+        {'write_throughput': (1_000_000, 3_000_000)},
         Result(state=State.WARN, summary='Write: 1.91 MB/s (warn/crit at 1.00 MB/s/3.00 MB/s)')
     ),
     (
-        {'write': (1, 1.5)},
+        {'write_throughput': (1_000_000, 1_500_000)},
         Result(state=State.CRIT, summary='Write: 1.91 MB/s (warn/crit at 1.00 MB/s/1.50 MB/s)')
     ),
     (
@@ -201,34 +203,31 @@ def test_check_dell_storage_volume(item, section, result, mocker):
         Result(state=State.CRIT, notice='Write operations: 117.00/s (warn/crit at 50.00/s/100.00/s)'),
     ),
     (
-        {'read_latency': (4, 5)},
+        {'read_latency': (0.004, 0.005)},
         Result(state=State.OK, notice='Read latency: 2 milliseconds'),
     ),
     (
-        {'read_latency': (1, 5)},
+        {'read_latency': (0.001, 0.005)},
         Result(state=State.WARN, notice='Read latency: 2 milliseconds (warn/crit at 1 millisecond/5 milliseconds)'),
     ),
     (
-        {'read_latency': (1, 2)},
+        {'read_latency': (0.001, 0.002)},
         Result(state=State.CRIT, notice='Read latency: 2 milliseconds (warn/crit at 1 millisecond/2 milliseconds)'),
     ),
     (
-        {'write_latency': (2, 3)},
+        {'write_latency': (0.002, 0.003)},
         Result(state=State.OK, notice='Write latency: 857 microseconds'),
     ),
     (
-        {'write_latency': (0.5, 3)},
+        {'write_latency': (0.0005, 0.003)},
         Result(state=State.WARN, notice='Write latency: 857 microseconds (warn/crit at 500 microseconds/3 milliseconds)'),
     ),
     (
-        {'write_latency': (0.5, 0.6)},
+        {'write_latency': (0.0005, 0.0006)},
         Result(state=State.CRIT, notice='Write latency: 857 microseconds (warn/crit at 500 microseconds/600 microseconds)'),
     ),
 ])
-def test_check_dell_storage_volume_w_param(params, result, mocker):
-    mocker.patch(
-        'cmk.base.plugins.agent_based.dell_storage_volume.get_value_store',
-        return_value={}
-    )
+def test_check_dell_storage_volume_w_param(params, result, monkeypatch):
+    monkeypatch.setattr(dell_storage_volume, 'get_value_store', get_value_store)
 
     assert result in list(dell_storage_volume.check_dell_storage_volume(SAMPLE_SECTION[1].name, params, [SAMPLE_SECTION[1]]))

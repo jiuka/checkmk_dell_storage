@@ -3,7 +3,7 @@
 #
 # checkmk_dell_storage - Checkmk extension for Dell Storage API
 #
-# Copyright (C) 2021  Marius Rieder <marius.rieder@scs.ch>
+# Copyright (C) 2021-2024  Marius Rieder <marius.rieder@durchmesser.ch>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -20,9 +20,10 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 from typing import NamedTuple
-from .agent_based_api.v1 import (
+from cmk.agent_based.v2 import (
+    AgentSection,
+    CheckPlugin,
     Metric,
-    register,
     Result,
     Service,
     State,
@@ -54,7 +55,7 @@ def parse_dell_storage_center(string_table):
     return [StorageCenter(*sc) for sc in string_table]
 
 
-register.agent_section(
+agent_section_dell_storage_center = AgentSection(
     name='dell_storage_center',
     parse_function=parse_dell_storage_center,
 )
@@ -88,7 +89,7 @@ def check_dell_storage_center(item, section):
         return
 
 
-register.check_plugin(
+check_plugin_dell_storage_center = CheckPlugin(
     name='dell_storage_center',
     service_name='StorageCenter %s',
     discovery_function=discovery_dell_storage_center,

@@ -3,7 +3,7 @@
 #
 # checkmk_dell_storage - Checkmk extension for Dell Storage API
 #
-# Copyright (C) 2021  Marius Rieder <marius.rieder@scs.ch>
+# Copyright (C) 2021-2024  Marius Rieder <marius.rieder@durchmesser.ch>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -21,14 +21,15 @@
 
 import time
 from typing import NamedTuple
-from .agent_based_api.v1 import (
+from cmk.agent_based.v2 import (
+    AgentSection,
+    CheckPlugin,
     get_value_store,
-    register,
     Result,
     Service,
     State,
 )
-from .utils import diskstat
+from cmk.plugins.lib import diskstat
 from .utils.dell_storage import (
     DSResult
 )
@@ -53,7 +54,7 @@ def parse_dell_storage_port(string_table):
     return [ScPort(*port) for port in string_table]
 
 
-register.agent_section(
+agent_section_dell_storage_port = AgentSection(
     name='dell_storage_port',
     parse_function=parse_dell_storage_port,
 )
@@ -96,7 +97,7 @@ def check_dell_storage_port(item, params, section):
         return
 
 
-register.check_plugin(
+check_plugin_dell_storage_port = CheckPlugin(
     name='dell_storage_port',
     service_name='Port %s',
     discovery_function=discovery_dell_storage_port,
