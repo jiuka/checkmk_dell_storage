@@ -25,7 +25,7 @@ from cmk.agent_based.v2 import (
     Result,
     State,
 )
-from cmk.base.plugins.agent_based.utils import dell_storage
+from cmk_addons.plugins.dell_storage.lib import dell_storage
 
 
 @pytest.mark.parametrize('value, result', [

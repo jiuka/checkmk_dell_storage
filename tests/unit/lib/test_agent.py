@@ -22,12 +22,10 @@
 import pytest  # type: ignore[import]
 import requests  # noqa: F401
 
-from importlib.util import spec_from_loader, module_from_spec
-from importlib.machinery import SourceFileLoader
-
-spec = spec_from_loader("agent_dell_storage", SourceFileLoader("agent_dell_storage", "agents/special/agent_dell_storage"))
-agent_dell_storage = module_from_spec(spec)
-spec.loader.exec_module(agent_dell_storage)
+from cmk_addons.plugins.dell_storage.lib.agent import (
+    DellStorageApi,
+    DellStorageApiParser
+)
 
 
 class TestDellStorageApiParser:
@@ -37,28 +35,28 @@ class TestDellStorageApiParser:
         ('100 °C / 212 °F', 100),
     ])
     def test_DellStorageApiParser_temperature(self, value, result):
-        assert agent_dell_storage.DellStorageApiParser.temperature(value) == result
+        assert DellStorageApiParser.temperature(value) == result
 
     @pytest.mark.parametrize('value, result', [
         ('10', 10240),
         ('1', 1024),
     ])
     def test_DellStorageApiParser_kbps(self, value, result):
-        assert agent_dell_storage.DellStorageApiParser.kbps(value) == result
+        assert DellStorageApiParser.kbps(value) == result
 
     @pytest.mark.parametrize('value, result', [
         ('1000000', 1),
         ('1', 0.000001),
     ])
     def test_DellStorageApiParser_latency(self, value, result):
-        assert agent_dell_storage.DellStorageApiParser.latency(value) == result
+        assert DellStorageApiParser.latency(value) == result
 
     @pytest.mark.parametrize('value, result', [
         ('10 Bit', 10),
         ('123 Bit', 123),
     ])
     def test_DellStorageApiParser_space(self, value, result):
-        assert agent_dell_storage.DellStorageApiParser.space(value) == result
+        assert DellStorageApiParser.space(value) == result
 
 
 LOGIN_RESP = dict(provider='PRO', providerVersion='VERS', instanceId='123')
@@ -71,7 +69,7 @@ class TestDellStorageApi:
         requests_mock.post('http://dsa:3033/rest/api/ApiConnection/Login', json=LOGIN_RESP)
         requests_mock.get('http://dsa:3033/rest/api/ApiConnection/ApiConnection/123/StorageCenterList', json=STORAGE_CENTERS)
 
-        return agent_dell_storage.DellStorageApi('http://dsa:3033/rest/api', 'user', 'pass', True)
+        return DellStorageApi('http://dsa:3033/rest/api', 'user', 'pass', True)
 
     def test_init(self, api):
         assert api._api['provider'] == 'PRO'
@@ -84,7 +82,7 @@ class TestDellStorageApi:
         assert api.url(call) == result
 
     def test_storage_centers(self, api, requests_mock):
-        assert type(api.storage_centers[0]) == agent_dell_storage.DellStorageApi.StorageCenter
+        assert isinstance(api.storage_centers[0], DellStorageApi.StorageCenter)
 
     def test_storage_centers_cached(self, api, requests_mock):
         api.storage_centers
@@ -110,7 +108,7 @@ class TestDellStorageApi:
         assert api.providerVersion == 'VERS'
 
     class TestApiObject:
-        class MockApiObject(agent_dell_storage.DellStorageApi.ApiObject):
+        class MockApiObject(DellStorageApi.ApiObject):
             AGENT_FIELDS = ['foo']
 
             instanceId: str

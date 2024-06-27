@@ -27,7 +27,7 @@ from cmk.agent_based.v2 import (
     Service,
     State,
 )
-from .utils.dell_storage import (
+from cmk_addons.plugins.dell_storage.lib.dell_storage import (
     DSResult
 )
 

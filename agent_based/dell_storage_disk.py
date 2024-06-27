@@ -29,7 +29,7 @@ from cmk.agent_based.v2 import (
     Service,
 )
 from cmk.plugins.lib import diskstat
-from .utils.dell_storage import (
+from cmk_addons.plugins.dell_storage.lib.dell_storage import (
     DSResult
 )
 

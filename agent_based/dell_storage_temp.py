@@ -29,7 +29,7 @@ from cmk.agent_based.v2 import (
     State,
 )
 from cmk.plugins.lib.temperature import check_temperature
-from .utils.dell_storage import (
+from cmk_addons.plugins.dell_storage.lib.dell_storage import (
     DSResult,
 )
 

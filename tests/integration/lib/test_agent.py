@@ -24,12 +24,7 @@ import os.path
 import pytest  # type: ignore[import]
 import requests  # noqa: F401
 
-from importlib.util import spec_from_loader, module_from_spec
-from importlib.machinery import SourceFileLoader
-
-spec = spec_from_loader("agent_dell_storage", SourceFileLoader("agent_dell_storage", "agents/special/agent_dell_storage"))
-agent_dell_storage = module_from_spec(spec)
-spec.loader.exec_module(agent_dell_storage)
+from cmk_addons.plugins.dell_storage.lib.agent import AgentDellStorage, DellStorageApi
 
 
 def text_callback(request, context):
@@ -48,7 +43,7 @@ def api(requests_mock):
     requests_mock.register_uri('GET', matcher, text=text_callback)
     requests_mock.register_uri('POST', matcher, text=text_callback)
 
-    return agent_dell_storage.DellStorageApi('http://dsa:3033/rest/api', 'user', 'pass', True)
+    return DellStorageApi('http://dsa:3033/rest/api', 'user', 'pass', True)
 
 
 class Args:
@@ -60,16 +55,13 @@ class Args:
 
 
 def test_AgentDellStorage_main(capsys, api):
-    agent = agent_dell_storage.AgentDellStorage()
+    agent = AgentDellStorage()
     agent.main(Args())
 
     captured = capsys.readouterr()
 
     assert captured.err == ""
     assert captured.out.splitlines()[:-1] == '''\
-<<<check_mk>>>
-Version: 18.1.20.114
-AgentOS: EnterpriseManager
 <<<<SAN>>>>
 <<<dell_storage_center:sep(59)>>>
 SAN;Up;;Sc5000Series;7.3.20.19;ABCD123;123456;0;2;44;0;38;0;8;19
@@ -103,15 +95,20 @@ Bottom Controller;Up;;1970-01-01T01:00:00+01:00;False;Sc5020;7.3.20.19;ABCD123;1
 <<<dell_storage_port:sep(59)>>>
 5555555555555526;Up;;True;Sas;5555555555555526;619;26691584;0.000336;1360;126127104;0.000118
 555555555555552C;Up;;True;Iscsi;555555555555552C;;;;;;
+<<<dell_storage_fan:sep(59)>>>
+<<<dell_storage_psu:sep(59)>>>
 <<<dell_storage_temp:sep(59)>>>
 BBU;Up;;None;25;-128;-7;10;55;65;127
 CPU One;Up;;None;46;-128;3;8;92;97;127
+<<<<>>>>
 <<<<SAN-TopController>>>>
 <<<dell_storage_controller:sep(59)>>>
 Top Controller;Up;;1970-01-01T01:00:00+01:00;True;Sc5020;7.3.20.19;ABCD123;123-456-789-00;123456
 <<<dell_storage_port:sep(59)>>>
 5555555555555518;Up;;True;Iscsi;5555555555555518;13;657408;0.002293;148;2349056;0.000584
 5555555555555516;Up;;True;Iscsi;5555555555555516;14;724992;0.002398;151;2310144;0.000549
+<<<dell_storage_fan:sep(59)>>>
+<<<dell_storage_psu:sep(59)>>>
 <<<dell_storage_temp:sep(59)>>>
 CPU One;Up;;None;45;-128;3;8;92;97;127
 BBU;Up;;None;27;-128;-7;10;55;65;127
@@ -119,9 +116,13 @@ BBU;Up;;None;27;-128;-7;10;55;65;127
 <<<<SAN-Enclosure-1>>>>
 <<<dell_storage_enclosure:sep(59)>>>
 Enclosure - 1;Up;;EN-SC5020;1.05;SasEbod12g;30;ABCD123;123-456-789-00
+<<<dell_storage_fan:sep(59)>>>
 <<<dell_storage_disk:sep(59)>>>
 01-16;Up;;360081014784;1800360124416;2;74752;0.003753;0;0;0.0
 01-08;Up;;1661088579584;1800360124416;;;;;;
+<<<dell_storage_psu:sep(59)>>>
+<<<dell_storage_temp:sep(59)>>>
+<<<<>>>>
 <<<<SAN-Enclosure-2>>>>
 <<<dell_storage_enclosure:sep(59)>>>
 Enclosure - 2;Up;;EN-SC420;1.09;SasEbod12g;24;JKSRF82;123-456-789-01

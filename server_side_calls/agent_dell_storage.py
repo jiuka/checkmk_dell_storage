@@ -20,15 +20,36 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 
-def agent_dell_storage_arguments(params, hostname, ipaddress):
-    args = [
-        '-u', params['user'],
-        '-p', passwordstore_get_cmdline('%s', params['password']),
-        '-U', params['url'],
+from collections.abc import Iterator
+
+from pydantic import BaseModel
+
+from cmk.server_side_calls.v1 import HostConfig, Secret, SpecialAgentCommand, SpecialAgentConfig
+
+
+class Params(BaseModel):
+    url: str
+    user: str
+    password: Secret | None = None
+    ignore_cert: str = 'check_cert'
+
+
+def commands_function(
+    params: Params,
+    host_config: HostConfig,
+) -> Iterator[SpecialAgentCommand]:
+    command_arguments: list[str | Secret] = [
+        '-u', params.user,
+        '-p', params.password.unsafe(),
+        '-U', params.url,
     ]
-    if 'ignore_cert' in params and params['ignore_cert'] != '':
-        args += ['--ignore-cert']
-    return args
+    if params.ignore_cert != 'check_cert':
+        command_arguments += ['--ignore-cert']
+    yield SpecialAgentCommand(command_arguments=command_arguments)
 
 
-special_agent_info['dell_storage'] = agent_dell_storage_arguments
+special_agent_dell_storage = SpecialAgentConfig(
+    name='dell_storage',
+    parameter_parser=Params.model_validate,
+    commands_function=commands_function,
+)

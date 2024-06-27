@@ -19,20 +19,22 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-from typing import Optional, Sequence
 import re
+from typing import Optional, Sequence
 import time
 import datetime
 import logging
 import requests
 from functools import cached_property
 
-from cmk.special_agents.utils.agent_common import (
+from cmk.special_agents.v0_unstable.agent_common import (
+    ConditionalPiggybackSection,
+    SectionWriter,
     special_agent_main,
 )
-from cmk.special_agents.utils.argument_parsing import (
+from cmk.special_agents.v0_unstable.argument_parsing import (
     Args,
-    create_default_argument_parser,
+    create_default_argument_parser
 )
 
 import urllib3
@@ -165,8 +167,12 @@ class DellStorageApi:
         def _fields(self):
             return self.AGENT_DEFAULT_FIELDS + self.AGENT_FIELDS
 
-        def to_agent(self, separator=';'):
+        def __str__(self, separator=';'):
             return separator.join([str(getattr(self, field, '')) for field in self._fields()])
+
+        @property
+        def safeInstanceName(self):
+            return re.sub(r"[^a-zA-Z0-9-_]", "", getattr(self, 'instanceName'))
 
     class StorageCenter(ApiObject):
         AGENT_FIELDS = [
@@ -504,76 +510,73 @@ class AgentDellStorage:
         try:
             self._api = DellStorageApi(args.url, args.user, args.password, args.verify_cert)
             for storageCenter in self._api.storage_centers:
-                self.piggyback(storageCenter.instanceName)
-                self.section('center', [storageCenter])
+                with ConditionalPiggybackSection(storageCenter.safeInstanceName):
+                    with SectionWriter('dell_storage_center', separator=';') as writer:
+                        writer.append(storageCenter)
 
-                self.section('controller', storageCenter.controllers)
+                    with SectionWriter('dell_storage_controller', separator=';') as writer:
+                        writer.append(c for c in storageCenter.controllers)
 
-                self.section('enclosure', storageCenter.enclosures)
+                    with SectionWriter('dell_storage_enclosure', separator=';') as writer:
+                        writer.append(e for e in storageCenter.enclosures)
 
-                self.section('volume', storageCenter.volumes)
+                    with SectionWriter('dell_storage_volume', separator=';') as writer:
+                        writer.append(v for v in storageCenter.volumes)
 
-                self.section('alert', storageCenter.activeAlerts, force=True)
-
-                print('<<<<>>>>')
+                    with SectionWriter('dell_storage_alert', separator=';') as writer:
+                        writer.append(a for a in storageCenter.activeAlerts)
 
                 if storageCenter.chassisPresent:
-                    self.piggyback(f'{storageCenter.instanceName}-{storageCenter.chassi.enclosure.instanceName}')
-                    self.section('fan', storageCenter.chassi.fans)
+                    with ConditionalPiggybackSection(f'{storageCenter.safeInstanceName}-{storageCenter.chassi.enclosure.safeInstanceName}'):
+                        with SectionWriter('dell_storage_fan', separator=';') as writer:
+                            writer.append(f for f in storageCenter.chassi.fans)
 
-                    self.section('psu', storageCenter.chassi.powersupplies)
+                        with SectionWriter('dell_storage_psu', separator=';') as writer:
+                            writer.append(p for p in storageCenter.chassi.powersupplies)
 
-                    self.section('temp', storageCenter.chassi.temperatures)
-                    print('<<<<>>>>')
+                        with SectionWriter('dell_storage_temp', separator=';') as writer:
+                            writer.append(t for t in storageCenter.chassi.temperatures)
 
                 for controller in storageCenter.controllers:
-                    self.piggyback(f'{storageCenter.instanceName}-{controller.instanceName}')
-                    self.section('controller', [controller])
+                    with ConditionalPiggybackSection(f'{storageCenter.safeInstanceName}-{controller.safeInstanceName}'):
+                        with SectionWriter('dell_storage_controller', separator=';') as writer:
+                            writer.append(controller)
 
-                    self.section('port', controller.ports)
+                        with SectionWriter('dell_storage_port', separator=';') as writer:
+                            writer.append(p for p in controller.ports)
 
-                    self.section('fan', controller.fans)
+                        with SectionWriter('dell_storage_fan', separator=';') as writer:
+                            writer.append(f for f in controller.fans)
 
-                    self.section('psu', controller.powersupplies)
+                        with SectionWriter('dell_storage_psu', separator=';') as writer:
+                            writer.append(p for p in controller.powersupplies)
 
-                    self.section('temp', controller.temperatures)
-                else:
-                    print('<<<<>>>>')
+                        with SectionWriter('dell_storage_temp', separator=';') as writer:
+                            writer.append(t for t in controller.temperatures)
 
                 for enclosure in storageCenter.enclosures:
-                    self.piggyback(f'{storageCenter.instanceName}-{enclosure.instanceName}')
-                    self.section('enclosure', [enclosure])
+                    with ConditionalPiggybackSection(f'{storageCenter.safeInstanceName}-{enclosure.safeInstanceName}'):
+                        with SectionWriter('dell_storage_enclosure', separator=';') as writer:
+                            writer.append(enclosure)
 
-                    self.section('fan', enclosure.fans)
+                        with SectionWriter('dell_storage_fan', separator=';') as writer:
+                            writer.append(f for f in enclosure.fans)
 
-                    self.section('disk', enclosure.disks)
+                        with SectionWriter('dell_storage_disk', separator=';') as writer:
+                            writer.append(d for d in enclosure.disks)
 
-                    self.section('psu', enclosure.powersupplies)
+                        with SectionWriter('dell_storage_psu', separator=';') as writer:
+                            writer.append(p for p in enclosure.powersupplies)
 
-                    self.section('temp', enclosure.temperatures)
-                else:
-                    print('<<<<>>>>')
+                        with SectionWriter('dell_storage_temp', separator=';') as writer:
+                            writer.append(t for t in enclosure.temperatures)
         except Exception as exc:
             if args.debug:
                 raise
             end = time.time()
-            print('<<<dell_storage_agent:sep(59)>>>')
-            print(f'1;;;{end-start};;{exc}')
+            with SectionWriter('dell_storage_agent', separator=';') as writer:
+                writer.append(f'1;;;{end - start};;{exc}')
         else:
             end = time.time()
-            print('<<<dell_storage_agent:sep(59)>>>')
-            print(f'0;{self._api.provider};{self._api.providerVersion};{end-start};{self._api.reqcnt};')
-
-    def piggyback(self, name=None):
-        print(f'<<<<{re.sub(r"[^a-zA-Z0-9-_]", "", name)}>>>>')
-
-    def section(self, name, instances=[], separator=';', force=False):
-        if not instances and not force:
-            return
-        print('<<<dell_storage_{name}:sep({sep})>>>'.format(name=name, sep=ord(separator)))
-        for instance in instances:
-            print(instance.to_agent(separator))
-
-
-if __name__ == '__main__':
-    AgentDellStorage().run()
+            with SectionWriter('dell_storage_agent', separator=';') as writer:
+                writer.append(f'0;{self._api.provider};{self._api.providerVersion};{end - start};{self._api.reqcnt};')
