@@ -130,8 +130,8 @@ class TestDellStorageApi:
         def test_fields(self, apiObject):
             assert apiObject._fields() == ['instanceName', 'status', 'statusMessage', 'foo']
 
-        def test_to_agent(self, apiObject):
-            assert apiObject.to_agent() == 'name;Up;;123'
+        def test_str(self, apiObject):
+            assert str(apiObject) == 'name;Up;;123'
 
-        def test_to_agent_sep(self, apiObject):
-            assert apiObject.to_agent('-') == 'name-Up--123'
+        def test_str_sep(self, apiObject):
+            assert apiObject.__str__('-') == 'name-Up--123'
