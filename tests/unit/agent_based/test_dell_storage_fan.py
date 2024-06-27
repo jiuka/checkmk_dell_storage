@@ -116,27 +116,27 @@ def test_check_dell_storage_fan(item, section, result):
 
 @pytest.mark.parametrize('params, result', [
     (
-        {'lower': ('fixed', (2400, 1800))},
+        {'lower': (2400, 1800)},
         Result(state=State.OK, summary='Fan Speed: 5880.00'),
     ),
     (
-        {'lower': ('fixed', (7000, 1800))},
+        {'lower': (7000, 1800)},
         Result(state=State.WARN, summary='Fan Speed: 5880.00 (warn/crit below 7000.00/1800.00)'),
     ),
     (
-        {'lower': ('fixed', (7000, 6000))},
+        {'lower': (7000, 6000)},
         Result(state=State.CRIT, summary='Fan Speed: 5880.00 (warn/crit below 7000.00/6000.00)'),
     ),
     (
-        {'upper': ('fixed', (6000, 7000))},
+        {'upper': (6000, 7000)},
         Result(state=State.OK, summary='Fan Speed: 5880.00'),
     ),
     (
-        {'upper': ('fixed', (4000, 7000))},
+        {'upper': (4000, 7000)},
         Result(state=State.WARN, summary='Fan Speed: 5880.00 (warn/crit at 4000.00/7000.00)'),
     ),
     (
-        {'upper': ('fixed', (4000, 5000))},
+        {'upper': (4000, 5000)},
         Result(state=State.CRIT, summary='Fan Speed: 5880.00 (warn/crit at 4000.00/5000.00)'),
     ),
 ])

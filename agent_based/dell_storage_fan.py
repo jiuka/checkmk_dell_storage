@@ -23,11 +23,11 @@ from typing import NamedTuple, Optional
 from cmk.agent_based.v2 import (
     AgentSection,
     CheckPlugin,
-    check_levels,
     Result,
     Service,
     State,
 )
+from cmk.agent_based.v1 import check_levels
 from cmk_addons.plugins.dell_storage.lib.dell_storage import (
     DSResult
 )
@@ -74,8 +74,8 @@ def check_dell_storage_fan(item, params, section):
             yield from check_levels(
                 value=int(fan.currentRpm),
                 metric_name='fan' if params.get('output_metrics', True) else None,
-                levels_lower=params.get('lower', ('fixed', (int(fan.lowerNormalThreshold), int(fan.lowerWarningThreshold)))),
-                levels_upper=params.get('upper', ('fixed', (int(fan.upperNormalThreshold), int(fan.upperWarningThreshold)))),
+                levels_lower=params.get('lower', (int(fan.lowerNormalThreshold), int(fan.lowerWarningThreshold))),
+                levels_upper=params.get('upper', (int(fan.upperNormalThreshold), int(fan.upperWarningThreshold))),
                 boundaries=(int(fan.lowerCriticalThreshold), int(fan.upperCriticalThreshold)),
                 label='Fan Speed',
             )
