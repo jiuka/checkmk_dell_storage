@@ -106,7 +106,7 @@ graph_dell_storage_volume_usage = graphs.Graph(
     compound_lines=['dell_storage_volume_usage'],
 )
 
-perfometer_dell_storage_center  = perfometers.Stacked(
+perfometer_dell_storage_center = perfometers.Stacked(
     name='dell_storage_center',
     upper=perfometers.Perfometer(
         name='dell_storage_center_disk',
