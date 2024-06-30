@@ -3,7 +3,7 @@
 #
 # checkmk_dell_storage - Checkmk extension for Dell Storage API
 #
-# Copyright (C) 2021  Marius Rieder <marius.rieder@scs.ch>
+# Copyright (C) 2021-2024  Marius Rieder <marius.rieder@durchmesser.ch>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -20,8 +20,9 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 from typing import NamedTuple
-from .agent_based_api.v1 import (
-    register,
+from cmk.agent_based.v2 import (
+    AgentSection,
+    CheckPlugin,
     Result,
     Service,
     State,
@@ -39,7 +40,7 @@ def parse_dell_storage_alert(string_table):
     return [ScAlert(*alert) for alert in string_table]
 
 
-register.agent_section(
+agent_section_dell_storage_alert = AgentSection(
     name='dell_storage_alert',
     parse_function=parse_dell_storage_alert,
 )
@@ -60,7 +61,7 @@ def check_dell_storage_alert(section):
             yield Result(state=State.WARN, summary=f'{alert.alertDefinition}: {alert.message} {alert.supportUrl}')
 
 
-register.check_plugin(
+check_plugin_dell_storage_alert = CheckPlugin(
     name='dell_storage_alert',
     service_name='StorageCenter Alert',
     discovery_function=discovery_dell_storage_alert,

@@ -19,35 +19,29 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+import pytest  # type: ignore[import]
 from cmk.agent_based.v2 import (
-    CheckPlugin,
     Metric,
     Result,
     Service,
     State,
 )
+from cmk_addons.plugins.dell_storage.agent_based import dell_storage_agent
 
 
-def discovery_dell_storage_agent(section):
-    if len(section) > 0:
-        yield Service()
+@pytest.mark.parametrize('string_table, result', [
+    ([], []),
+    ([['FooBar']], [Service()]),
+])
+def test_discovery_dell_storage_agent(string_table, result):
+    assert list(dell_storage_agent.discovery_dell_storage_agent(string_table)) == result
 
 
-def check_dell_storage_agent(section):
-    state, provider, version, time, requests, exc = section[0]
-
-    if state == '0':
-        yield Result(state=State.OK, summary=f'{provider} v{version}')
-        yield Metric('request', float(requests))
-    else:
-        yield Result(state=State.CRIT, summary=f'Exception: {exc}')
-
-    yield Metric('time', float(time))
-
-
-check_plugin_dell_storage_agent = CheckPlugin(
-    name='dell_storage_agent',
-    service_name='Dell Storage API',
-    discovery_function=discovery_dell_storage_agent,
-    check_function=check_dell_storage_agent,
-)
+@pytest.mark.parametrize('string_table, result', [
+    ([['0', 'provider', 'version', '23', '42', '']], Result(state=State.OK, summary='provider vversion')),
+    ([['0', 'provider', 'version', '23', '42', '']], Metric('request', 42.0)),
+    ([['0', 'provider', 'version', '23', '42', '']], Metric('time', 23)),
+    ([['1', '', '', '23', '', 'Yolo']], Result(state=State.CRIT, summary='Exception: Yolo')),
+])
+def test_check_dell_storage_agent(string_table, result):
+    assert result in list(dell_storage_agent.check_dell_storage_agent(string_table))

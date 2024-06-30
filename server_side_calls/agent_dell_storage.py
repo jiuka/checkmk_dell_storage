@@ -19,35 +19,37 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-from cmk.agent_based.v2 import (
-    CheckPlugin,
-    Metric,
-    Result,
-    Service,
-    State,
-)
+
+from collections.abc import Iterator
+
+from pydantic import BaseModel
+
+from cmk.server_side_calls.v1 import HostConfig, Secret, SpecialAgentCommand, SpecialAgentConfig
 
 
-def discovery_dell_storage_agent(section):
-    if len(section) > 0:
-        yield Service()
+class Params(BaseModel):
+    url: str
+    user: str
+    password: Secret | None = None
+    ignore_cert: str = 'check_cert'
 
 
-def check_dell_storage_agent(section):
-    state, provider, version, time, requests, exc = section[0]
+def commands_function(
+    params: Params,
+    host_config: HostConfig,
+) -> Iterator[SpecialAgentCommand]:
+    command_arguments: list[str | Secret] = [
+        '-u', params.user,
+        '-p', params.password.unsafe(),
+        '-U', params.url,
+    ]
+    if params.ignore_cert != 'check_cert':
+        command_arguments += ['--ignore-cert']
+    yield SpecialAgentCommand(command_arguments=command_arguments)
 
-    if state == '0':
-        yield Result(state=State.OK, summary=f'{provider} v{version}')
-        yield Metric('request', float(requests))
-    else:
-        yield Result(state=State.CRIT, summary=f'Exception: {exc}')
 
-    yield Metric('time', float(time))
-
-
-check_plugin_dell_storage_agent = CheckPlugin(
-    name='dell_storage_agent',
-    service_name='Dell Storage API',
-    discovery_function=discovery_dell_storage_agent,
-    check_function=check_dell_storage_agent,
+special_agent_dell_storage = SpecialAgentConfig(
+    name='dell_storage',
+    parameter_parser=Params.model_validate,
+    commands_function=commands_function,
 )

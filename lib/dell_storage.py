@@ -20,34 +20,22 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 from cmk.agent_based.v2 import (
-    CheckPlugin,
-    Metric,
-    Result,
-    Service,
     State,
+    Result,
 )
 
 
-def discovery_dell_storage_agent(section):
-    if len(section) > 0:
-        yield Service()
+def DSStatus(value):
+    return {
+        'Up': State.OK,
+        'Degraded': State.WARN,
+        'Down': State.CRIT,
+        'Unknown': State.UNKNOWN,
+    }.get(value, State.UNKNOWN)
 
 
-def check_dell_storage_agent(section):
-    state, provider, version, time, requests, exc = section[0]
-
-    if state == '0':
-        yield Result(state=State.OK, summary=f'{provider} v{version}')
-        yield Metric('request', float(requests))
+def DSResult(dsobject):
+    if dsobject.statusMessage:
+        yield Result(state=DSStatus(dsobject.status), summary=f'{dsobject.status}: {dsobject.statusMessage}')
     else:
-        yield Result(state=State.CRIT, summary=f'Exception: {exc}')
-
-    yield Metric('time', float(time))
-
-
-check_plugin_dell_storage_agent = CheckPlugin(
-    name='dell_storage_agent',
-    service_name='Dell Storage API',
-    discovery_function=discovery_dell_storage_agent,
-    check_function=check_dell_storage_agent,
-)
+        yield Result(state=DSStatus(dsobject.status), summary=dsobject.status)
