@@ -43,6 +43,14 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 LOGGING = logging.getLogger('agent_dell_storage')
 
 
+class BytesString:
+    def __init__(self, value):
+        self.value = value.split(' ')[0]
+
+    def __str__(self):
+        return self.value
+
+
 class DellStorageApiParser:
     @staticmethod
     def temperature(value):
@@ -182,6 +190,7 @@ class DellStorageApi:
             'objectCount.numberOfDisks', 'objectCount.numberOfLiveVolumes',
             'objectCount.numberOfReplays', 'objectCount.numberOfReplications',
             'objectCount.numberOfServers', 'objectCount.numberOfVolumes',
+            'storageUsage.availableSpace', 'storageUsage.allocatedSpace', 'storageUsage.usedSpace'
         ]
 
         instanceId: str
@@ -201,6 +210,10 @@ class DellStorageApi:
         @cached_property
         def objectCount(self):
             return self._get_association(f'/StorageCenter/StorageCenter/{self.instanceId}/ObjectCount')
+
+        @cached_property
+        def storageUsage(self):
+            return self._get_association(f'/StorageCenter/StorageCenter/{self.instanceId}/StorageUsage')
 
         @cached_property
         def controllers(self):
@@ -247,6 +260,11 @@ class DellStorageApi:
         numberOfReplications: int
         numberOfServers: int
         numberOfVolumes: int
+
+    class StorageCenterStorageUsage(ApiObject):
+        availableSpace: BytesString
+        allocatedSpace: BytesString
+        usedSpace: BytesString
 
     class ScController(ApiObject):
         AGENT_FIELDS = [

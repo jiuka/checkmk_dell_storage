@@ -61,6 +61,27 @@ metric_dell_storage_center_volume = metrics.Metric(
     color=metrics.Color.GREEN,
 )
 
+metric_dell_storage_center_space_available = metrics.Metric(
+    name='space_available',
+    title=Title('Space Available'),
+    unit=metrics.Unit(metrics.SINotation("bytes")),
+    color=metrics.Color.LIGHT_BLUE,
+)
+
+metric_dell_storage_center_space_allocated = metrics.Metric(
+    name='space_allocated',
+    title=Title('Space Allocated'),
+    unit=metrics.Unit(metrics.SINotation("bytes")),
+    color=metrics.Color.LIGHT_GREEN,
+)
+
+metric_dell_storage_center_space_used = metrics.Metric(
+    name='space_used',
+    title=Title('Space Used'),
+    unit=metrics.Unit(metrics.SINotation("bytes")),
+    color=metrics.Color.GREEN,
+)
+
 metric_dell_storage_center_live_volume = metrics.Metric(
     name='dell_storage_center_live_volume',
     title=Title('Live Volumes'),
@@ -92,6 +113,18 @@ graph_dell_storage_center_disk = graphs.Graph(
     ],
 )
 
+graph_dell_storage_center_space = graphs.Graph(
+    name='dell_storage_center_space',
+    title=Title('Storage Center Space'),
+    compound_lines=[
+        'space_used',
+    ],
+    simple_lines=[
+        'space_available',
+        'space_allocated',
+    ],
+)
+
 graph_dell_storage_disk_usage = graphs.Graph(
     name='dell_storage_disk_usage',
     title=Title('Disk usage'),
@@ -106,16 +139,13 @@ graph_dell_storage_volume_usage = graphs.Graph(
     compound_lines=['dell_storage_volume_usage'],
 )
 
-perfometer_dell_storage_center = perfometers.Stacked(
+perfometer_dell_storage_center = perfometers.Perfometer(
     name='dell_storage_center',
-    upper=perfometers.Perfometer(
-        name='dell_storage_center_disk',
-        focus_range=perfometers.FocusRange(perfometers.Closed(0), perfometers.Open(10)),
-        segments=['dell_storage_center_disk'],
+    focus_range=perfometers.FocusRange(
+        perfometers.Closed(0),
+        perfometers.Closed('space_available')
     ),
-    lower=perfometers.Perfometer(
-        name='dell_storage_center_volume',
-        focus_range=perfometers.FocusRange(perfometers.Closed(0), perfometers.Open(10)),
-        segments=['dell_storage_center_volume'],
-    ),
+    segments=[
+        'space_used',
+    ],
 )

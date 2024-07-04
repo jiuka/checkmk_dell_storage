@@ -22,8 +22,10 @@
 from typing import NamedTuple
 from cmk.agent_based.v2 import (
     AgentSection,
+    check_levels,
     CheckPlugin,
     Metric,
+    render,
     Result,
     Service,
     State,
@@ -49,6 +51,9 @@ class StorageCenter(NamedTuple):
     numberOfReplications: int
     numberOfServers: int
     numberOfVolumes: int
+    spaceAvailable: int
+    spaceAllocated: int
+    spaceUsed: int
 
 
 def parse_dell_storage_center(string_table):
@@ -76,6 +81,29 @@ def check_dell_storage_center(item, section):
         yield Result(state=State.OK, summary=f'Model: {sc.modelSeries} v{sc.version}')
         yield Result(state=State.OK, summary=f'ST: {sc.serviceTag}')
         yield Result(state=State.OK, summary=f'SN: {sc.serialNumber}')
+
+        yield from check_levels(
+            value=float(sc.spaceAvailable),
+            metric_name='space_available',
+            label='Available',
+            render_func=render.disksize
+        )
+
+        yield from check_levels(
+            value=float(sc.spaceUsed),
+            metric_name='space_used',
+            boundaries=(0, float(sc.spaceAllocated)),
+            label='Used',
+            render_func=render.disksize
+        )
+
+        yield from check_levels(
+            value=float(sc.spaceAllocated),
+            metric_name='space_allocated',
+            boundaries=(0, float(sc.spaceAvailable)),
+            label='Allocated',
+            render_func=render.disksize
+        )
 
         yield Metric('controller', float(sc.numberOfControllers))
         yield Metric('device', float(sc.numberOfDevicesInUse))

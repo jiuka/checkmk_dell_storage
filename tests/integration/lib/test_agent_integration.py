@@ -64,7 +64,7 @@ def test_AgentDellStorage_main(capsys, api):
     assert captured.out.splitlines()[:-1] == '''\
 <<<<SAN>>>>
 <<<dell_storage_center:sep(59)>>>
-SAN;Up;;Sc5000Series;7.3.20.19;ABCD123;123456;0;2;44;0;38;0;8;19
+SAN;Up;;Sc5000Series;7.3.20.19;ABCD123;123456;0;2;44;0;38;0;8;19;130000000000000;95000000000000;77000000000000
 <<<dell_storage_controller:sep(59)>>>
 Bottom Controller;Up;;1970-01-01T01:00:00+01:00;False;Sc5020;7.3.20.19;ABCD123;123-456-789-00;123457
 Top Controller;Up;;1970-01-01T01:00:00+01:00;True;Sc5020;7.3.20.19;ABCD123;123-456-789-00;123456

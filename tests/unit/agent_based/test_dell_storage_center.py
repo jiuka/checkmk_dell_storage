@@ -31,7 +31,7 @@ from cmk_addons.plugins.dell_storage.agent_based import dell_storage_center
 
 @pytest.mark.parametrize('string_table, result', [
     (
-        [['SAN', 'Up', '', 'Sc5000Series', '7.3.20.19', 'ABCD123', '987654', '0', '2', '4', '0', '19', '0', '8', '19']],
+        [['SAN', 'Up', '', 'Sc5000Series', '7.3.20.19', 'ABCD123', '987654', '0', '2', '4', '0', '19', '0', '8', '19', '130000000000000', '100000000000000', '30000000000000']],
         [dell_storage_center.StorageCenter(
             name='SAN',
             status='Up',
@@ -48,6 +48,9 @@ from cmk_addons.plugins.dell_storage.agent_based import dell_storage_center
             numberOfReplications='0',
             numberOfServers='8',
             numberOfVolumes='19',
+            spaceAvailable='130000000000000',
+            spaceAllocated='100000000000000',
+            spaceUsed='30000000000000',
         )]
     ),
 ])
@@ -75,6 +78,9 @@ def test_parse_dell_storage_center(string_table, result):
                 numberOfReplications='0',
                 numberOfServers='8',
                 numberOfVolumes='19',
+                spaceAvailable='130000000000000',
+                spaceAllocated='100000000000000',
+                spaceUsed='30000000000000',
             )
         ],
         [Service(item='SAN')]
@@ -97,6 +103,9 @@ def test_parse_dell_storage_center(string_table, result):
                 numberOfReplications='0',
                 numberOfServers='8',
                 numberOfVolumes='19',
+                spaceAvailable='130000000000000',
+                spaceAllocated='100000000000000',
+                spaceUsed='30000000000000',
             ),
             dell_storage_center.StorageCenter(
                 name='SAN2',
@@ -114,6 +123,9 @@ def test_parse_dell_storage_center(string_table, result):
                 numberOfReplications='0',
                 numberOfServers='8',
                 numberOfVolumes='19',
+                spaceAvailable='130000000000000',
+                spaceAllocated='100000000000000',
+                spaceUsed='30000000000000',
             )
         ],
         [
@@ -147,6 +159,9 @@ def test_discovery_dell_storage_center(section, result):
                 numberOfReplications='0',
                 numberOfServers='8',
                 numberOfVolumes='19',
+                spaceAvailable='130000000000000',
+                spaceAllocated='100000000000000',
+                spaceUsed='30000000000000',
             )
         ],
         []
@@ -170,6 +185,9 @@ def test_discovery_dell_storage_center(section, result):
                 numberOfReplications='10',
                 numberOfServers='12',
                 numberOfVolumes='14',
+                spaceAvailable='130000000000000',
+                spaceAllocated='100000000000000',
+                spaceUsed='30000000000000',
             )
         ],
         [
@@ -177,6 +195,12 @@ def test_discovery_dell_storage_center(section, result):
             Result(state=State.OK, summary='Model: Sc5000Series v7.3.20.19'),
             Result(state=State.OK, summary='ST: ABCD123'),
             Result(state=State.OK, summary='SN: 987654'),
+            Result(state=State.OK, summary='Available: 130 TB'),
+            Metric('space_available', 130000000000000.0),
+            Result(state=State.OK, summary='Used: 30.0 TB'),
+            Metric('space_used', 30000000000000.0, boundaries=(0.0, 100000000000000.0)),
+            Result(state=State.OK, summary='Allocated: 100 TB'),
+            Metric('space_allocated', 100000000000000.0, boundaries=(0.0, 130000000000000.0)),
             Metric('controller', 0),
             Metric('device', 2),
             Metric('disk', 4),
