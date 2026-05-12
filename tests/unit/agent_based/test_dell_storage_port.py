@@ -157,75 +157,75 @@ def test_check_dell_storage_port(item, section, result, monkeypatch):
 
 @pytest.mark.parametrize('params, result', [
     (
-        {'read_throughput': (1_000_000, 2_000_000)},
+        {'read_throughput': ('fixed', (1_000_000, 2_000_000))},
         Result(state=State.OK, summary='Read: 899 kB/s'),
     ),
     (
-        {'read_throughput': (500_000, 2_000_000)},
+        {'read_throughput': ('fixed', (500_000, 2_000_000))},
         Result(state=State.WARN, summary='Read: 899 kB/s (warn/crit at 500 kB/s/2.00 MB/s)')
     ),
     (
-        {'read_throughput': (500_000, 800_000)},
+        {'read_throughput': ('fixed', (500_000, 800_000))},
         Result(state=State.CRIT, summary='Read: 899 kB/s (warn/crit at 500 kB/s/800 kB/s)')
     ),
     (
-        {'write_throughput': (3_000_000, 4_000_000)},
+        {'write_throughput': ('fixed', (3_000_000, 4_000_000))},
         Result(state=State.OK, summary='Write: 2.46 MB/s')
     ),
     (
-        {'write_throughput': (1_000_000, 4_000_000)},
+        {'write_throughput': ('fixed', (1_000_000, 4_000_000))},
         Result(state=State.WARN, summary='Write: 2.46 MB/s (warn/crit at 1.00 MB/s/4.00 MB/s)')
     ),
     (
-        {'write_throughput': (1_000_000, 2_000_000)},
+        {'write_throughput': ('fixed', (1_000_000, 2_000_000))},
         Result(state=State.CRIT, summary='Write: 2.46 MB/s (warn/crit at 1.00 MB/s/2.00 MB/s)')
     ),
     (
-        {'read_ios': (20, 30)},
+        {'read_ios': ('fixed', (20, 30))},
         Result(state=State.OK, notice='Read operations: 16.00/s'),
     ),
     (
-        {'read_ios': (5, 30)},
+        {'read_ios': ('fixed', (5, 30))},
         Result(state=State.WARN, notice='Read operations: 16.00/s (warn/crit at 5.00/s/30.00/s)'),
     ),
     (
-        {'read_ios': (5, 10)},
+        {'read_ios': ('fixed', (5, 10))},
         Result(state=State.CRIT, notice='Read operations: 16.00/s (warn/crit at 5.00/s/10.00/s)'),
     ),
     (
-        {'write_ios': (200, 400)},
+        {'write_ios': ('fixed', (200, 400))},
         Result(state=State.OK, notice='Write operations: 159.00/s'),
     ),
     (
-        {'write_ios': (50, 400)},
+        {'write_ios': ('fixed', (50, 400))},
         Result(state=State.WARN, notice='Write operations: 159.00/s (warn/crit at 50.00/s/400.00/s)'),
     ),
     (
-        {'write_ios': (50, 100)},
+        {'write_ios': ('fixed', (50, 100))},
         Result(state=State.CRIT, notice='Write operations: 159.00/s (warn/crit at 50.00/s/100.00/s)'),
     ),
     (
-        {'read_latency': (0.004, 0.005)},
+        {'read_latency': ('fixed', (0.004, 0.005))},
         Result(state=State.OK, notice='Read latency: 3 milliseconds'),
     ),
     (
-        {'read_latency': (0.001, 0.005)},
+        {'read_latency': ('fixed', (0.001, 0.005))},
         Result(state=State.WARN, notice='Read latency: 3 milliseconds (warn/crit at 1 millisecond/5 milliseconds)'),
     ),
     (
-        {'read_latency': (0.001, 0.002)},
+        {'read_latency': ('fixed', (0.001, 0.002))},
         Result(state=State.CRIT, notice='Read latency: 3 milliseconds (warn/crit at 1 millisecond/2 milliseconds)'),
     ),
     (
-        {'write_latency': (0.002, 0.003)},
+        {'write_latency': ('fixed', (0.002, 0.003))},
         Result(state=State.OK, notice='Write latency: 459 microseconds'),
     ),
     (
-        {'write_latency': (0.00005, 0.003)},
+        {'write_latency': ('fixed', (0.00005, 0.003))},
         Result(state=State.WARN, notice='Write latency: 459 microseconds (warn/crit at 50 microseconds/3 milliseconds)'),
     ),
     (
-        {'write_latency': (0.00005, 0.00006)},
+        {'write_latency': ('fixed', (0.00005, 0.00006))},
         Result(state=State.CRIT, notice='Write latency: 459 microseconds (warn/crit at 50 microseconds/60 microseconds)'),
     ),
 ])
