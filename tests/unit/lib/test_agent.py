@@ -33,6 +33,8 @@ class TestDellStorageApiParser:
         ('', None),
         ('0 °C / 3 °F', 0),
         ('100 °C / 212 °F', 100),
+        ('10 C/50 F', 10),
+        ('-5 C/23 F', -5),
     ])
     def test_DellStorageApiParser_temperature(self, value, result):
         assert DellStorageApiParser.temperature(value) == result
@@ -106,6 +108,34 @@ class TestDellStorageApi:
 
     def test_providerVersion(self, api):
         assert api.providerVersion == 'VERS'
+
+    def test_default_api_version(self, api, requests_mock):
+        assert requests_mock.request_history[0].headers['x-dell-api-version'] == '4.0'
+
+    def test_custom_api_version(self, requests_mock):
+        requests_mock.post('http://dsa:3033/rest/api/ApiConnection/Login', json=LOGIN_RESP)
+        DellStorageApi('http://dsa:3033/rest/api', 'user', 'pass', True, '3.4')
+        assert requests_mock.request_history[0].headers['x-dell-api-version'] == '3.4'
+
+    def test_logout(self, api, requests_mock):
+        requests_mock.post('http://dsa:3033/rest/api/ApiConnection/Logout', status_code=204)
+        api.logout()
+        assert requests_mock.request_history[-1].url == 'http://dsa:3033/rest/api/ApiConnection/Logout'
+
+    def test_historical_not_implemented(self, api, requests_mock):
+        url = 'http://dsa:3033/rest/api/StorageCenter/ScVolume/1/GetHistoricalIoUsage'
+        requests_mock.post(url, status_code=400, json={'result': 'Method not implemented'})
+        volume = DellStorageApi.ScVolume(api, instanceId='1', instanceName='vol')
+        assert volume._get_historical_association('/StorageCenter/ScVolume/1/GetHistoricalIoUsage') is None
+        assert volume._get_historical_association('/StorageCenter/ScVolume/1/GetHistoricalIoUsage') is None
+        assert sum(1 for r in requests_mock.request_history if r.url == url) == 1
+
+    def test_historical_other_error_raises(self, api, requests_mock):
+        url = 'http://dsa:3033/rest/api/StorageCenter/ScVolume/1/GetHistoricalIoUsage'
+        requests_mock.post(url, status_code=500)
+        volume = DellStorageApi.ScVolume(api, instanceId='1', instanceName='vol')
+        with pytest.raises(requests.HTTPError):
+            volume._get_historical_association('/StorageCenter/ScVolume/1/GetHistoricalIoUsage')
 
     class TestApiObject:
         class MockApiObject(DellStorageApi.ApiObject):

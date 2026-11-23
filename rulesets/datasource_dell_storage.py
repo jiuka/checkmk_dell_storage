@@ -68,6 +68,16 @@ def _form_special_agents_dell_storage() -> Dictionary:
                 ),
                 required=True,
             ),
+            'api_version': DictElement(
+                parameter_form=String(
+                    title=Title('Dell Storage API version (x-dell-api-version)'),
+                    help_text=Help('Use 4.0 with Dell Storage Manager. A Storage Center SCOS 7.x '
+                                   'connected directly accepts 3.0 to 3.4.'),
+                    prefill=DefaultValue('4.0'),
+                    custom_validate=(validators.MatchRegex(r'^\d+\.\d+$'),),
+                ),
+                required=False,
+            ),
             'ignore_cert': DictElement(
                 parameter_form=SingleChoice(
                     title=Title('SSL certificate checking'),

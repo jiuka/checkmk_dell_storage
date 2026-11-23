@@ -32,6 +32,7 @@ class Params(BaseModel):
     user: str
     password: Secret | None = None
     ignore_cert: str = 'check_cert'
+    api_version: str | None = None
 
 
 def commands_function(
@@ -40,9 +41,11 @@ def commands_function(
 ) -> Iterator[SpecialAgentCommand]:
     command_arguments: list[str | Secret] = [
         '-u', params.user,
-        '-p', params.password.unsafe(),
+        '--password-id', params.password,
         '-U', params.url,
     ]
+    if params.api_version:
+        command_arguments += ['--api-version', params.api_version]
     if params.ignore_cert != 'check_cert':
         command_arguments += ['--ignore-cert']
     yield SpecialAgentCommand(command_arguments=command_arguments)

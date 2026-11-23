@@ -38,6 +38,11 @@ from cmk.special_agents.v0_unstable.argument_parsing import (
 )
 
 import urllib3
+
+try:
+    from cmk.password_store.v1_unstable import dereference_secret
+except ImportError:  # Checkmk without the v1_unstable password store API
+    dereference_secret = None
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 LOGGING = logging.getLogger('agent_dell_storage')
@@ -55,7 +60,9 @@ class DellStorageApiParser:
     @staticmethod
     def temperature(value):
         if value:
-            return int(value.split('°')[0])
+            # SCOS 7.x returns '10 C/50 F'; newer releases return '10°C'
+            match = re.match(r'\s*(-?\d+)', value)
+            return int(match.group(1)) if match else None
         return None
 
     @staticmethod
@@ -73,6 +80,7 @@ class DellStorageApiParser:
 
 class DellStorageApi:
     reqcnt = 0
+    historical_supported = True
 
     HISTORICAL_FILTER = {
         'HistoricalFilter': {
@@ -82,10 +90,11 @@ class DellStorageApi:
         }
     }
 
-    def __init__(self, url, user, password, verify_cert):
+    def __init__(self, url, user, password, verify_cert, api_version='4.0'):
         LOGGING.info('Initialize DellStorageApi Clinet')
         self._url = url
         self._verify_cert = verify_cert
+        self._api_version = api_version
 
         self._login(user, password)
 
@@ -95,7 +104,7 @@ class DellStorageApi:
         conn.headers.update({
             'Content-Type': 'application/json; charset=utf-8',
             'Accept': 'application/json',
-            'x-dell-api-version': '4.0',
+            'x-dell-api-version': self._api_version,
         })
         return conn
 
@@ -111,6 +120,13 @@ class DellStorageApi:
         resp.raise_for_status()
         self.reqcnt += 1
         return resp.json()
+
+    def logout(self) -> None:
+        # Without a logout every run leaves an open session on the Storage Center.
+        try:
+            self._connection.post(self.url('/ApiConnection/Logout'), verify=self._verify_cert, timeout=30)
+        except requests.RequestException as exc:
+            LOGGING.info('Logout failed: %s', exc)
 
     def url(self, call):
         return f'{self._url.rstrip("/")}/{call.strip("/")}'
@@ -141,7 +157,8 @@ class DellStorageApi:
         def __init__(self, api, **kwargs):
             self._api = api
 
-            for key, vtype in self.__annotations__.items():
+            # type(self): with Python 3.14 (PEP 649) instances no longer expose class annotations
+            for key, vtype in type(self).__annotations__.items():
                 self.__setattr__(key, vtype(kwargs.get(key, None)))
 
         def __getattribute__(self, name):
@@ -157,7 +174,19 @@ class DellStorageApi:
             return self._instanciate(self._api.get(url))
 
         def _get_historical_association(self, url):
-            assoc = self._api.post(url, payload=DellStorageApi.HISTORICAL_FILTER)
+            # A Storage Center reached directly (no Dell Storage Manager) answers
+            # 400 "Method not implemented" for historical IO: continue without metrics
+            # and do not ask again during this run.
+            if not self._api.historical_supported:
+                return None
+            try:
+                assoc = self._api.post(url, payload=DellStorageApi.HISTORICAL_FILTER)
+            except requests.HTTPError as exc:
+                if exc.response is not None and exc.response.status_code in (400, 501):
+                    LOGGING.info('Historical IO usage not available: %s', exc)
+                    self._api.historical_supported = False
+                    return None
+                raise
             if len(assoc) > 0:
                 return self._instanciate(assoc[0])
             return None
@@ -511,8 +540,13 @@ class AgentDellStorage:
 
         parser.add_argument('-u', '--user', dest='user', required=True,
                             help='User to access the DSM.')
-        parser.add_argument('-p', '--password', dest='password', required=True,
-                            help='Password to access the DSM.')
+        secret = parser.add_mutually_exclusive_group(required=True)
+        secret.add_argument('-p', '--password', dest='password',
+                            help='Password to access the DSM (prefer --password-id).')
+        secret.add_argument('--password-id', dest='password_id',
+                            help='Password store reference <id>:<file>, resolved by Checkmk.')
+        parser.add_argument('--api-version', dest='api_version', default='4.0',
+                            help='Value for x-dell-api-version (Storage Center SCOS 7.x direct: 3.0 to 3.4).')
         parser.add_argument('-U', '--url', dest='url', required=True,
                             help='URL of the DSM RESt API. (Example https://host:3033/api/rest/)')
         parser.add_argument('--ignore-cert', dest='verify_cert', action='store_false',
@@ -526,7 +560,13 @@ class AgentDellStorage:
         start = time.time()
 
         try:
-            self._api = DellStorageApi(args.url, args.user, args.password, args.verify_cert)
+            password = args.password
+            if getattr(args, 'password_id', None):
+                if dereference_secret is None:
+                    raise RuntimeError('--password-id needs Checkmk 2.4 or newer')
+                password = dereference_secret(args.password_id).reveal()
+            self._api = DellStorageApi(args.url, args.user, password, args.verify_cert,
+                                       getattr(args, 'api_version', '4.0'))
             for storageCenter in self._api.storage_centers:
                 with ConditionalPiggybackSection(storageCenter.safeInstanceName):
                     with SectionWriter('dell_storage_center', separator=';') as writer:
@@ -598,3 +638,6 @@ class AgentDellStorage:
             end = time.time()
             with SectionWriter('dell_storage_agent', separator=';') as writer:
                 writer.append(f'0;{self._api.provider};{self._api.providerVersion};{end - start};{self._api.reqcnt};')
+        finally:
+            if getattr(self, '_api', None) is not None:
+                self._api.logout()
